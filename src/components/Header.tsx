@@ -1,33 +1,58 @@
 // src/components/Header.tsx
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+
+// 1. IMPORTAR TIPOS Y DATOS
+import type { Producto } from '../types'; 
+// Importa la base de datos simulada
+import productosDB from '../data/productos.json'; 
 
 // Define la estructura del usuario (tipificación)
 interface Usuario {
     username: string;
     rol: 'user' | 'admin';
-    // Asumiendo que puedes tener una foto de perfil, aunque no se usa en el menú
     fotoPerfil?: string; 
 }
 
+// Función auxiliar para formatear la categoría para mostrarla en el menú (ej: "pc_gamer" -> "PC Gamer")
+const formatearCategoria = (categoria: string): string => {
+    // Reemplaza guiones bajos por espacios y capitaliza la primera letra de cada palabra
+    const sinGuiones = categoria.replace(/_/g, ' ');
+    return sinGuiones.toLowerCase().split(' ').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+};
+
 const Header: React.FC = () => {
-    // Obtiene el usuario actual desde localStorage (TypeScript requiere el tipado)
+    
+    // Obtiene el usuario actual
     const usuarioActualJSON = localStorage.getItem("usuarioActual");
     const usuarioActual: Usuario | null = usuarioActualJSON ? JSON.parse(usuarioActualJSON) : null;
     
     const navigate = useNavigate();
 
+    // 2. LÓGICA PARA OBTENER CATEGORÍAS ÚNICAS (Solo se recalcula si productosDB cambia, que es poco probable)
+    const categoriasUnicas: string[] = useMemo(() => {
+        // Aseguramos el tipado correcto
+        const productos: Producto[] = productosDB as Producto[];
+        
+        // 1. Extrae solo el campo 'categoria'
+        const todasLasCategorias = productos.map(p => p.categoria);
+        
+        // 2. Filtra para obtener solo los valores únicos
+        return Array.from(new Set(todasLasCategorias));
+    }, []); // El array vacío [] asegura que se ejecute solo una vez
+
     const handleCerrarSesion = (e: React.MouseEvent) => {
         e.preventDefault();
-        // Lógica de cierre de sesión
         localStorage.removeItem("usuarioActual");
-        // Redirige usando el hook de React Router
         navigate("/main"); 
     };
 
     return (
         <nav style={{ width: '100%', height: '100%' }} className="navbar navbar-expand-sm navbar-dark bg-black">
             <div className="container-fluid">
+                {/* Logo y Marca */}
                 <Link to="/main">
                     <img src="/img/header/logo_sin_fondo.png" alt="Logo" style={{ width: '60px' }} />
                 </Link>
@@ -41,28 +66,53 @@ const Header: React.FC = () => {
                         <li className="nav-item">
                             <Link className="nav-link" to="/sobreLEVEL-UP">¿Quienes somos?</Link>
                         </li>
+                        
+                        {/* 3. Menú de Productos y Categorías Dinámicas */}
                         <li className="nav-item dropdown">
-                            <Link className="nav-link" to="/productos" id="productosDropdown">Productos</Link>
-                            {/* Nota: Para que el dropdown funcione correctamente, necesitarías el JS de Bootstrap
-                                cargado o usar un componente de React que maneje el estado de apertura.
-                                Por simplicidad, dejamos el HTML, pero el manejo del estado sería ideal. */}
+                            {/* El data-bs-toggle="dropdown" es clave para que Bootstrap JS funcione */}
+                            <Link 
+                                className="nav-link dropdown-toggle" 
+                                to="/productos" 
+                                id="productosDropdown"
+                                data-bs-toggle="dropdown" 
+                                aria-expanded="false"
+                            >
+                                Productos
+                            </Link>
+                            
                             <ul className="dropdown-menu" aria-labelledby="productosDropdown">
-                                <li><Link className="dropdown-item" to="/productos?categoria=figuras">Figuras</Link></li>
-                                {/* ... [Añade el resto de tus categorías aquí] ... */}
+                                
+                                {/* Link general a todos los productos */}
+                                <li><Link className="dropdown-item" to="/productos">Ver Todo</Link></li>
+                                <li><hr className="dropdown-divider" /></li>
+                                
+                                {/* Generación dinámica de categorías */}
+                                {categoriasUnicas.map(categoria => (
+                                    <li key={categoria}>
+                                        <Link 
+                                            className="dropdown-item" 
+                                            // La ruta lleva a /productos con un query param para filtrar
+                                            to={`/productos?categoria=${categoria}`}
+                                        >
+                                            {formatearCategoria(categoria)}
+                                        </Link>
+                                    </li>
+                                ))}
                             </ul>
                         </li>
+                        
                         <li className="nav-item">
                             <Link className="nav-link" to="/eventos">Eventos</Link>
                         </li>
                     </ul>
 
-                    {/* La búsqueda en React se manejaría con un hook que guarda el valor del input */}
+                    {/* Formulario de Búsqueda */}
                     <form className="d-flex" onSubmit={(e) => { e.preventDefault(); navigate(`/main?productoSearch=${(document.getElementById('productoSearch') as HTMLInputElement).value}`) }}>
                         <input className="form-control me-2" type="text" name="productoSearch" id="productoSearch" placeholder="Introduce tu búsqueda" />
                         <button className="btn btn-primary" type="submit">Buscar</button>
                     </form>
 
-                    {/* Menú de Usuario */}
+                    {/* Menú de Usuario (código sin cambios) */}
                     <a className="navbar-nav nav-link dropdown-toggle ms-3 align-items-end" href="#" data-bs-toggle="dropdown" aria-expanded="false">
                         <img 
                             src={usuarioActual?.fotoPerfil || "/img/header/user-logo-generic-white-alt.png"} 

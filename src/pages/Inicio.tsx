@@ -1,4 +1,3 @@
-// src/pages/Inicio.tsx
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -163,7 +162,7 @@ const MainScreen: React.FC = () => {
             {/* Banner de Whatsapp */}
             <div className="container">
                 <a href="https://api.whatsapp.com/send?phone=56984543683&text=¡Hola!" className="link-completo">
-                    <div className="mt-4 p-5 bg-secondary text-white rounded d-flex justify-content-between align-items-center">
+                    <div className="mt-4 p-5 bg-verde-neon text-white rounded d-flex justify-content-between align-items-center">
                         <div>
                             <h1>¿Necesitas servicio técnico?</h1>
                             <p>Contáctanos a nuestro Whatsapp</p>

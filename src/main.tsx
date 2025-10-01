@@ -1,22 +1,20 @@
 // src/main.tsx
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-// Asegúrate de que la extensión sea correcta: App.tsx
-import App from './App.tsx'; 
+import App from './App.tsx';
 
-// 1. Importa los estilos de Bootstrap
+// 1. IMPORTAR ESTILOS CSS
 import 'bootstrap/dist/css/bootstrap.min.css';
-// 2. Importa tus estilos globales
-import './index.css'; 
-// 3. Importa los estilos de los íconos (si los instalaste)
 import 'bootstrap-icons/font/bootstrap-icons.css';
-// 🚨 ELIMINAR: Ya no necesitas importar Footer aquí.
-// import Footer from './components/Footer.tsx'; 
+import './index.css'; 
 
+// 2. IMPORTAR JAVASCRIPT DE BOOTSTRAP (NECESARIO PARA CARRUSEL, MODAL Y DROPDOWNS)
+import 'bootstrap/dist/js/bootstrap.bundle.min.js'; // Importa el bundle completo de JS
 
-ReactDOM.createRoot(document.getElementById('root')!).render( // Agregamos '!' para asegurar que el elemento existe
+// NOTA: No necesitamos importar Footer aquí, se usa dentro de App.tsx
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    {/* 💥 CAMBIO CRÍTICO: Debes renderizar el componente App */}
-    <App /> 
+    <App />
   </React.StrictMode>,
 )

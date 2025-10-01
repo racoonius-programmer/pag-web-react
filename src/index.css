@@ -1,0 +1,158 @@
+/* Roboto para el body */
+body .roboto {
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Orbitron para la navbar */
+.navbar * {
+  font-family: 'Orbitron', sans-serif !important;
+}
+
+/* Orbitron para el footer */
+.orbitron {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: bold;
+}
+
+/*Para cargar los colores de fondo que meti en bootstrap.css*/
+.bg-azul-electrico {
+  background-color: #1E90FF !important;
+}
+
+.text-azul-electrico {
+  color: #1E90FF !important;
+}
+
+.bg-verde-neon {
+  background-color: #39FF14 !important;
+}
+
+.text-verde-neon {
+  color: #39FF14 !important;
+}
+
+/*Para botones*/
+.btn-azul-electrico {
+  background-color: #1E90FF !important;
+  border-color: #1E90FF !important;
+  color: #fff !important;
+}
+
+.btn-azul-electrico:hover {
+  background-color: #1E90FF !important;
+  border-color: #1E90FF !important;
+}
+.btn-verde-neon {
+  background-color: #39FF14 !important;
+  border-color: #39FF14 !important;
+}
+
+.btn-verde-neon:hover {
+  background-color: #39FF14 !important;
+  border-color: #39FF14 !important;
+}
+
+/*Para que el footer se pegue al fondo de la pag*/
+html, body {
+  height: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+/* Abrir dropdown al pasar el mouse */
+.nav-item.dropdown:hover .dropdown-menu {
+    display: block;
+    margin-top: 0; /* Opcional para que no se desplace */
+}
+
+.link-completo {
+  display: block;      /* Que ocupe todo el ancho del contenedor */
+  text-decoration: none; /* Evita subrayado en los textos */
+  color: inherit;        /* Mantiene el color del texto original */
+}
+.link-completo img {
+  pointer-events: none; /* Evita que la imagen bloquee el clic */
+}
+
+
+
+/* ---------------------------------- */
+/* ESTILOS PARA LAS TARJETAS    */
+/* ---------------------------------- */
+
+.card {
+    background-color: #1e1e1e; /* Color de fondo para las tarjetas */
+    color: #f0f0f0;
+    border: 1px solid #444; /* Borde sutil para separar las tarjetas */
+}
+
+.card-title {
+    color: #e0e0e0; /* Color de texto para el título de las tarjetas */
+}
+
+.text-lightgray {
+    color: #b0b0b0 !important; /* Color de texto más tenue para las descripciones */
+}
+
+/* ---------------------------------- */
+/* ESTILOS PARA EL FILTRO        */
+/* ---------------------------------- */
+
+.sidebar-filters {
+    background-color: #1e1e1e; /* Fondo del panel de filtros */
+    color: #f0f0f0;
+    border: 1px solid #444;
+    border-radius: .25rem;
+}
+
+.sidebar-filters h4,
+.sidebar-filters h5 {
+    color: #e0e0e0; /* Color de los títulos de las secciones de filtro */
+}
+
+/* Estilo para los checkboxes y sus etiquetas */
+.form-check-input {
+    background-color: #343a40; /* Fondo de la casilla sin marcar */
+    border-color: #666;
+}
+
+.form-check-input:checked {
+    background-color: #1E90FF; /* Fondo de la casilla marcada */
+    border-color: #1E90FF;
+}
+
+/* ---------------------------------- */
+/* ESTILOS PARA EL ORDENAMIENTO   */
+/* ---------------------------------- */
+
+
+
+/* ---------------------------------- */
+/* ESTILOS PARA BOTONES         */
+/* ---------------------------------- */
+
+.btn-primary {
+    background-color: #1E90FF; /* Color de fondo del botón "Buscar" y "Aplicar filtros" */
+    border-color: #1E90FF;
+}
+
+.btn-primary:hover {
+    background-color: #007bff; /* Cambio de color al pasar el mouse */
+    border-color: #007bff;
+}
+
+.btn-secondary {
+    background-color: #1E90FF; /* Color de fondo para el botón "Ordenar por" */
+    border-color: #1E90FF;
+}
+
+.btn-outline-secondary {
+    color: white; /* Color de texto para el botón "Limpiar filtros" */
+    border-color: #1E90FF;
+    background-color: #1E90FF;
+}

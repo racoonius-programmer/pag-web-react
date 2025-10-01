@@ -42,7 +42,6 @@ const Header: React.FC = () => {
                             <Link className="nav-link" to="/sobreLEVEL-UP">¿Quienes somos?</Link>
                         </li>
                         <li className="nav-item dropdown">
-                            {/* En React, el Link reemplaza el <a> simple para navegación interna */}
                             <Link className="nav-link" to="/productos" id="productosDropdown">Productos</Link>
                             {/* Nota: Para que el dropdown funcione correctamente, necesitarías el JS de Bootstrap
                                 cargado o usar un componente de React que maneje el estado de apertura.

@@ -11,6 +11,7 @@ import LoginScreen from './pages/User_Login';
 import RegisterScreen from './pages/User_Register'; // Ruta de Registro separada
 import SobreLevelUp from './pages/SobreLevelUp';
 import ProductoCarrito from './pages/ProductsCarrito';
+import ProductShop from './pages/ProductShop';
 
 const App: React.FC = () => {
   return (
@@ -28,6 +29,7 @@ const App: React.FC = () => {
 
             {/* 2. RUTAS DE NAVEGACIÓN PRINCIPAL */}
             <Route path="/sobreLEVEL-UP" element={<SobreLevelUp />} />
+            <Route path="/productos" element={<ProductShop/>} /> 
 
             
             {/* 3. RUTAS DE AUTENTICACIÓN (Nombres limpios y consistentes) */}

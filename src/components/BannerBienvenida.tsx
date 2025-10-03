@@ -65,14 +65,14 @@ const BannerBienvenida: React.FC = () => {
                     <h2 className="text-light mb-2">¡Bienvenido!</h2>
                     <p className="text-light mb-0">
                         Para una mejor experiencia, por favor
-                        <Link to="/inicio-sesion" className="text-primary text-decoration-underline ms-1">inicia sesión</Link>
+                        <Link to="/login" className="text-primary text-decoration-underline ms-1">inicia sesión</Link>
                         o
-                        <Link to="/registro" className="text-success text-decoration-underline ms-1">regístrate</Link>.
+                        <Link to="/register" className="text-success text-decoration-underline ms-1">regístrate</Link>.
                     </p>
                 </div>
                 <div>
-                    <Link to="/inicio-sesion" className="btn btn-primary me-2">Iniciar sesión</Link>
-                    <Link to="/registro" className="btn btn-success">Registrarse</Link>
+                    <Link to="/login" className="btn btn-primary me-2">Iniciar sesión</Link>
+                    <Link to="/register" className="btn btn-success">Registrarse</Link>
                 </div>
             </div>
         );

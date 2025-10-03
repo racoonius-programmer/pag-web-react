@@ -1,18 +1,13 @@
-// src/components/Header.tsx
 import React, { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-// 1. IMPORTAR TIPOS Y DATOS
-import type { Producto } from '../types'; 
+// 1. Importa los tipos desde sus nuevos archivos
+import type { Producto } from '../types/Product'; 
+import type { UsuarioSesion } from '../types/User'; 
+
 // Importa la base de datos simulada
 import productosDB from '../data/productos.json'; 
 
-// Define la estructura del usuario (tipificación)
-interface Usuario {
-    username: string;
-    rol: 'user' | 'admin';
-    fotoPerfil?: string; 
-}
 
 // Función auxiliar para formatear la categoría para mostrarla en el menú (ej: "pc_gamer" -> "PC Gamer")
 const formatearCategoria = (categoria: string): string => {
@@ -24,10 +19,9 @@ const formatearCategoria = (categoria: string): string => {
 };
 
 const Header: React.FC = () => {
-    
-    // Obtiene el usuario actual
+    // Obtiene el usuario actual desde localStorage (usando UsuarioSesion)
     const usuarioActualJSON = localStorage.getItem("usuarioActual");
-    const usuarioActual: Usuario | null = usuarioActualJSON ? JSON.parse(usuarioActualJSON) : null;
+    const usuarioActual: UsuarioSesion | null = usuarioActualJSON ? JSON.parse(usuarioActualJSON) : null;
     
     const navigate = useNavigate();
 
@@ -135,8 +129,8 @@ const Header: React.FC = () => {
                             </>
                         ) : (
                             <>
-                                <li><Link className="dropdown-item" to="/registro">Registro</Link></li>
-                                <li><Link className="dropdown-item" to="/inicio-sesion">Iniciar Sesión</Link></li>
+                                <li><Link className="dropdown-item" to="/register">Registro</Link></li>
+                                <li><Link className="dropdown-item" to="/login">Iniciar Sesión</Link></li>
                             </>
                         )}
                     </ul>

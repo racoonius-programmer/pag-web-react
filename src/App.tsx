@@ -1,58 +1,58 @@
-// src/App.tsx
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 
 // Importa los componentes de Layout
 import Header from './components/Header';
 import Footer from './components/Footer'; 
 
-// Importa los componentes de Página
+// Importa los componentes de Página (Asegúrate de que existan o usa placeholders)
 import MainScreen from './pages/Inicio'; 
-// Importa placeholders para evitar errores, aunque aún no estén terminados
-//import PagoScreen from './pages/PagoScreen'; 
-//import LoginScreen from './pages/LoginScreen'; 
-//import ProductosScreen from './pages/ProductosScreen'; 
-//import CarritoScreen from './pages/CarritoScreen'; 
-
+import LoginScreen from './pages/User_Login'; 
+import RegisterScreen from './pages/User_Register'; // Ruta de Registro separada
+import SobreLevelUp from './pages/SobreLevelUp';
+import ProductoCarrito from './pages/ProductsCarrito';
 
 const App: React.FC = () => {
   return (
-    // 1. BrowserRouter: Habilita el enrutamiento basado en URL
     <BrowserRouter>
-      {/* Estructura principal para que el Footer quede abajo */}
       <div className="d-flex flex-column min-vh-100" style={{ backgroundColor: 'black' }}>
         
-        {/* HEADER: Componente fijo visible en todas las rutas */}
         <Header />
         
-        {/* MAIN: El contenido que cambia según la ruta */}
         <main className="flex-grow-1">
           <Routes>
             
-            {/* RUTA PRINCIPAL (INICIO) */}
+            {/* 1. RUTAS PRINCIPALES */}
             <Route path="/" element={<MainScreen />} />            
             <Route path="/main" element={<MainScreen />} />
+
+            {/* 2. RUTAS DE NAVEGACIÓN PRINCIPAL */}
+            <Route path="/sobreLEVEL-UP" element={<SobreLevelUp />} />
+
             
-            {/* RUTAS PLACEHOLDER 
-            <Route path="/productos" element={<ProductosScreen />} />
-            <Route path="/inicio-sesion" element={<LoginScreen />} />
-            <Route path="/carrito" element={<CarritoScreen />} />
-            <Route path="/pago" element={<PagoScreen />} />
-            <Route path="/registro" element={<LoginScreen />} /> {/* Asumo que el registro usa o redirige al login temporalmente */}
+            {/* 3. RUTAS DE AUTENTICACIÓN (Nombres limpios y consistentes) */}
+            <Route path="/login" element={<LoginScreen />} />         {/* Iniciar Sesión */}
+            <Route path="/register" element={<RegisterScreen />} />   {/* Registro */}
+
+            {/* 4. RUTAS DE COMPRA */}
+            <Route path="/carrito" element={<ProductoCarrito />} />
+
+
+            {/* TODO: Otras rutas pendientes: /perfil, /admin, /producto-detalle/:codigo */}
             
-            {/* RUTA 404 */}
+            {/* RUTA 404 (Debe ser la última) */}
             <Route path="*" element={
               <div className="text-center p-5 text-white bg-dark">
                 <h1>404</h1>
                 <p>Página no encontrada.</p>
+                <Link to="/main" className='btn btn-primary'>Ir al Inicio</Link>
               </div>
             } />
           </Routes>
         </main>
 
-        {/* FOOTER: Componente fijo en la parte inferior */}
         <Footer />
-           
+          
       </div>
     </BrowserRouter>
   );

@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1,
+    "username": "admin",
+    "correo": "admin@gmail.com",
+    "contrasena": "admin123",
+    "fechaNacimiento": "1990-01-01",
+    "telefono": "123456789",
+    "direccion": "Av. Principal 100",
+    "region": "Región Metropolitana de Santiago",
+    "comuna": "Santiago",
+    "fotoPerfil": "/img/header/user-logo-generic-white-alt.png",
+    "rol": "admin",
+    "descuentoDuoc": false
+  },
+  {
+    "id": 2,
+    "username": "juanito",
+    "correo": "juanito@duoc.cl",
+    "contrasena": "juanito123",
+    "fechaNacimiento": "2000-05-12",
+    "telefono": "987654321",
+    "direccion": "Calle Secundaria 45",
+    "region": "Valparaíso",
+    "comuna": "Viña del Mar",
+    "fotoPerfil": "/img/header/user-logo-generic-white-alt.png",
+    "rol": "usuario",
+    "descuentoDuoc": true
+  },
+  {
+    "id": 3,
+    "username": "maria",
+    "correo": "maria@gmail.com",
+    "contrasena": "maria123",
+    "fechaNacimiento": "1995-09-20",
+    "telefono": "555555555",
+    "direccion": "Av. Las Flores 12",
+    "region": "Región del Biobío",
+    "comuna": "Concepción",
+    "fotoPerfil": "/img/header/user-logo-generic-white-alt.png",
+    "rol": "usuario",
+    "descuentoDuoc": false
+  }
+]

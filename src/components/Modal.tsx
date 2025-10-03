@@ -58,7 +58,6 @@ const GlobalModal: React.FC<GlobalModalProps> = ({ show, title, message, onClose
         };
     }, [show, onHiddenCallback, onClose]); // Dependencias del hook
 
-    // Nota: El CSS personalizado debe estar en un archivo CSS global o módulo CSS
     return (
         <div className="modal fade" id="generalModal" ref={modalRef} tabIndex={-1} aria-labelledby="modalTitle" aria-hidden="true">
             <div className="modal-dialog modal-dialog-centered">

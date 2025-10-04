@@ -1,8 +1,6 @@
-// src/components/GlobalModal.tsx
 import React, { useEffect, useRef } from 'react';
-// Debes asegurarte de que la librería Bootstrap JS esté disponible en tu proyecto
-// Aunque no lo importamos directamente aquí, debe ser accesible por el navegador
-// si queremos usar new bootstrap.Modal().
+// Asegúrate de que la librería Bootstrap JS esté disponible globalmente
+// (usualmente a través de una importación en tu archivo principal o index.html).
 
 // Define las props para el componente
 interface GlobalModalProps {
@@ -20,57 +18,89 @@ const GlobalModal: React.FC<GlobalModalProps> = ({ show, title, message, onClose
     const modalRef = useRef<HTMLDivElement>(null);
     const modalInstanceRef = useRef<any>(null);
 
-    // Efecto para inicializar el modal de Bootstrap y manejar su ciclo de vida
+    // 1. Efecto de Inicialización y Listeners (Se ejecuta solo al montar)
+    // Este useEffect se encarga de crear la instancia de Bootstrap y añadir el listener de cierre.
     useEffect(() => {
         if (!modalRef.current) return;
 
-        // 1. Inicializar el objeto Modal de Bootstrap solo una vez
-        if (!modalInstanceRef.current && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-            modalInstanceRef.current = new bootstrap.Modal(modalRef.current);
-        }
-
         const modalElement = modalRef.current;
         
-        // Función para ejecutar el callback y el cierre de estado de React
+        // Inicializar el objeto Modal de Bootstrap solo una vez
+        if (!modalInstanceRef.current && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            modalInstanceRef.current = new bootstrap.Modal(modalElement);
+        }
+        
+        // Función que se ejecuta cuando Bootstrap OCULTA el modal
         const handleHidden = () => {
+            // 🚨 1. Ejecuta el callback (donde está el navigate)
             if (onHiddenCallback) {
-                onHiddenCallback();
+                onHiddenCallback(); 
             }
-            // Limpia el listener para evitar múltiples ejecuciones
-            modalElement.removeEventListener('hidden.bs.modal', handleHidden);
-            onClose(); // Cambia el estado de React para que 'show' sea false
+            // 🚨 2. Actualiza el estado de React en el componente padre (show: false)
+            onClose(); 
         };
 
+        // Añadir el listener permanente al evento 'hidden.bs.modal'
+        // NOTA: Usamos los callbacks de las props para asegurar que siempre usamos la versión más reciente.
+        modalElement.addEventListener('hidden.bs.modal', handleHidden);
+
+        // Cleanup: Elimina el listener y destruye la instancia al desmontar
+        return () => {
+            modalElement.removeEventListener('hidden.bs.modal', handleHidden);
+            modalInstanceRef.current?.dispose(); // Destruir la instancia de Bootstrap
+        };
+        // Dependencias: Solo los callbacks que pueden cambiar
+    }, [onHiddenCallback, onClose]); 
+
+    // 2. Efecto de Sincronización (Se ejecuta solo cuando la prop 'show' cambia)
+    // Este useEffect se encarga de mostrar u ocultar el modal cuando la prop 'show' de React cambia.
+    useEffect(() => {
+        if (!modalInstanceRef.current) return;
+        
         if (show) {
-            // Añade el listener ANTES de mostrarlo
-            modalElement.addEventListener('hidden.bs.modal', handleHidden);
-            modalInstanceRef.current?.show();
+            // Si React dice "mostrar", Bootstrap lo muestra.
+            modalInstanceRef.current.show();
         } else {
-            // Si el estado de React es 'false', oculta el modal si está visible
-            if (modalInstanceRef.current?._isShown) {
-                modalInstanceRef.current?.hide();
+            // Si React dice "ocultar", forzamos a Bootstrap a ocultarlo.
+            // Esto evita problemas si el modal ya se cerró por el listener.
+            if (modalInstanceRef.current._isShown) {
+                modalInstanceRef.current.hide();
             }
         }
-
-        // Cleanup: Se ejecuta cuando el componente se desmonta o antes de que el efecto se vuelva a ejecutar
-        return () => {
-             modalElement.removeEventListener('hidden.bs.modal', handleHidden);
-        };
-    }, [show, onHiddenCallback, onClose]); // Dependencias del hook
+    }, [show]); 
 
     return (
-        <div className="modal fade" id="generalModal" ref={modalRef} tabIndex={-1} aria-labelledby="modalTitle" aria-hidden="true">
+        <div 
+            className="modal fade" 
+            id="generalModal" 
+            ref={modalRef} 
+            tabIndex={-1} 
+            aria-labelledby="modalTitle" 
+            aria-hidden="true"
+        >
             <div className="modal-dialog modal-dialog-centered">
                 <div className="modal-content modal-content-dark">
                     <div className="modal-header">
                         <h5 className="modal-title text-light" id="modalTitle">{title}</h5>
-                        <button type="button" className="btn-close btn-close-white btn-close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
+                        {/* El botón usa data-bs-dismiss="modal" para que Bootstrap lo cierre, lo que dispara 'hidden.bs.modal' */}
+                        <button 
+                            type="button" 
+                            className="btn-close btn-close-white btn-close-modal" 
+                            data-bs-dismiss="modal" 
+                            aria-label="Close"
+                        ></button>
                     </div>
                     <div className="modal-body text-light" id="modalBody">
                         {message}
                     </div>
                     <div className="modal-footer border-top-0">
-                        <button type="button" className="btn btn-secondary btn-close-modal" data-bs-dismiss="modal">Aceptar</button>
+                        <button 
+                            type="button" 
+                            className="btn btn-secondary btn-close-modal" 
+                            data-bs-dismiss="modal"
+                        >
+                            Aceptar
+                        </button>
                     </div>
                 </div>
             </div>

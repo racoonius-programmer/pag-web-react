@@ -1,19 +1,35 @@
 /**
  * Define la estructura de un usuario en la base de datos simulada.
  */
-export interface UsuarioDB {
-  id: number;
-  username: string;
-  correo: string;
-  contrasena: string;
-  fechaNacimiento: string; // Formato YYYY-MM-DD
-  telefono: string;
-  direccion: string;
-  region: string;
-  comuna: string;
-  fotoPerfil: string;
-  rol: "admin" | "usuario"; // Roles tipificados
-  descuentoDuoc: boolean;
+// src/types/User.ts
+
+// Asegúrate de que tu interfaz Usuario sea robusta
+export interface Usuario {
+    id: number;
+    username: string;
+    correo: string;
+    fechaNacimiento: string; // YYYY-MM-DD
+    contrasena: string;
+    telefono: string; // formato limpio (sin espacios)
+    direccion: string;
+    region: string;
+    comuna: string;
+    rol: "usuario" | "admin";
+    descuentoDuoc: boolean;
+    fotoPerfil: string;
+}
+
+// Tipo para manejar los errores de validación en el estado de React
+export interface FormErrors {
+    correo?: string;
+    contrasena?: string;
+    confirmarContrasena?: string;
+    username?: string;
+    fecha?: string;
+    telefono?: string;
+    direccion?: string;
+    region?: string;
+    comuna?: string;
 }
 
 // Interfaz más simple para el usuario logueado en localStorage/Header

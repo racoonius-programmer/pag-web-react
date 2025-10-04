@@ -17,7 +17,7 @@ const MainScreen: React.FC = () => {
             {/* El carrusel de inicio */}
             <CarruselPrincipal />
 
-            {/* Sección "Lo más vendido"*/}
+            {/* Sección "Lo más vendido" (Aún pendiente de modularizar) */}
             <ProductosDestacados/>
 
             {/* 3. Componente modularizado */}

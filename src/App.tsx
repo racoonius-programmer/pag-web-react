@@ -13,6 +13,7 @@ import SobreLevelUp from './pages/SobreLevelUp';
 import ProductoCarrito from './pages/ProductsCarrito';
 import ProductShop from './pages/ProductShop';
 import Events from './pages/Events';
+import UserRegister from './pages/User_Register';
 
 const App: React.FC = () => {
   return (
@@ -36,7 +37,7 @@ const App: React.FC = () => {
             
             {/* 3. RUTAS DE AUTENTICACIÓN (Nombres limpios y consistentes) */}
             <Route path="/login" element={<LoginScreen />} />         {/* Iniciar Sesión */}
-            <Route path="/register" element={<RegisterScreen />} />   {/* Registro */}
+            <Route path="/register" element={<UserRegister />} />   {/* Registro */}
 
             {/* 4. RUTAS DE COMPRA */}
             <Route path="/carrito" element={<ProductoCarrito />} />

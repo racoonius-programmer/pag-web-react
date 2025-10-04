@@ -1,4 +1,3 @@
-// src/hooks/useDescuento.ts
 import { useMemo } from 'react';
 import type { Producto } from '../types/Product';
 import type { UsuarioSesion } from '../types/User'; 

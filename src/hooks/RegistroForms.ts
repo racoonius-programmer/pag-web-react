@@ -55,8 +55,7 @@ const calculateAge = (today: Date, birthDateStr: string): number => {
 // CUSTOM HOOK: useRegistroForm
 // ----------------------------------------------------------------------
 
-export function useRegistroForm(region: string, comuna: string) {
-    const { showModal } = useModal();
+export function useRegistroForm(region: string, comuna: string, showModal?: (msg: string, title?: string, cb?: () => void) => void) {
     const today = useMemo(() => new Date(), []);
 
     // 🚨 1. ESTADO ADICIONAL: Controla si el usuario ha interactuado
@@ -237,13 +236,14 @@ export function useRegistroForm(region: string, comuna: string) {
     // --- Función de Submit (Registro) ---
     const handleRegistroSubmit = useCallback((e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        console.log("Submit ejecutado"); // <-- AGREGAR ESTO
 
         // 🚨 3. Forzar el estado 'touched' al intentar submit para mostrar todos los errores
         setIsFormTouched(true);
 
         const validationError = validateForm(formData);
         if (validationError) {
-            showModal(validationError, "Error de Validación");
+            showModal!(validationError, "Error de Validación");
             return;
         }
 
@@ -265,7 +265,9 @@ export function useRegistroForm(region: string, comuna: string) {
 
         // 2. Verificar si el usuario ya existe
         if (usuariosGuardados.some(u => u.correo === correo)) {
-            showModal("El correo ya está registrado.", "Error de Registro");
+            if (showModal) {
+                showModal("El correo ya está registrado.", "Error de Registro");
+            }
             return;
         }
 
@@ -289,20 +291,24 @@ export function useRegistroForm(region: string, comuna: string) {
         usuariosGuardados.push(nuevoUsuario);
         localStorage.setItem("usuarios", JSON.stringify(usuariosGuardados));
         
-        let redirectPath = "/main.html";
+        let redirectPath = "/main"; // <-- Cambia a la ruta de React
         let modalTitle = "Registro Exitoso";
         let modalMessage = "¡Registro exitoso!" + (descuentoDuoc ? " Tienes 20% de descuento de por vida." : "");
 
         if (usuarioLogueado && usuarioLogueado.rol === 'admin') {
-            redirectPath = "/admin_main.html";
+            redirectPath = "/admin";
         } else {
             localStorage.setItem("usuarioActual", JSON.stringify(nuevoUsuario));
         }
 
-        // 5. Mostrar Modal con Callback de Redirección
-        showModal(modalMessage, modalTitle, () => {
-            window.location.href = redirectPath;
-        });
+        // Mostrar Modal con Callback de Redirección
+        if (showModal) {
+            showModal(
+                "¡Registro exitoso! Serás redirigido a la página principal.",
+                "Registro Exitoso",
+                () => { window.location.href = "/main"; } // o usa useNavigate si prefieres
+            );
+        }
 
     }, [formData, validateForm, showModal, region, comuna]);
 

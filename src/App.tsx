@@ -8,13 +8,13 @@ import Footer from './components/Footer';
 // Importa los componentes de Página (Asegúrate de que existan o usa placeholders)
 import MainScreen from './pages/Inicio'; 
 import LoginScreen from './pages/User_Login'; 
-import RegisterScreen from './pages/User_Register'; // Ruta de Registro separada
+import UserRegisterPage from './pages/User_Register'; // Ruta de Registro separada
 import SobreLevelUp from './pages/SobreLevelUp';
 import ProductoCarrito from './pages/ProductsCarrito';
 import ProductShop from './pages/ProductShop';
 import Events from './pages/Events';
-import UserRegister from './pages/User_Register';
-
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 const App: React.FC = () => {
   return (
     <BrowserRouter>
@@ -37,7 +37,7 @@ const App: React.FC = () => {
             
             {/* 3. RUTAS DE AUTENTICACIÓN (Nombres limpios y consistentes) */}
             <Route path="/login" element={<LoginScreen />} />         {/* Iniciar Sesión */}
-            <Route path="/register" element={<UserRegister />} />   {/* Registro */}
+            <Route path="/register" element={<UserRegisterPage />} />   {/* Registro */}
 
             {/* 4. RUTAS DE COMPRA */}
             <Route path="/carrito" element={<ProductoCarrito />} />

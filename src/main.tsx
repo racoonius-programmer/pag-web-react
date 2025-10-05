@@ -8,7 +8,9 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import './index.css'; 
 
 // Las librerias de bootstrap
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+// @ts-ignore
+import * as bootstrap from 'bootstrap/dist/js/bootstrap.bundle.min.js';
+(window as any).bootstrap = bootstrap;
 
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

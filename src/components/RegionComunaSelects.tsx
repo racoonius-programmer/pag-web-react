@@ -1,14 +1,16 @@
 // src/components/RegionComunaSelects.tsx
 import React, { useState, useEffect, useCallback } from 'react';
-// Simular la importación del JSON. En un proyecto real, necesitarías este archivo.
-import regionesData from '../data/chileGeo.json'; // Asegúrate de tener este archivo JSON
 
 interface RegionComunaProps {
     onRegionChange: (region: string) => void;
     onComunaChange: (comuna: string) => void;
     currentRegion: string;
     currentComuna: string;
-    // La prop 'required' de HTML es manejada por el formulario padre
+}
+
+interface RegionData {
+    region: string;
+    comunas: string[];
 }
 
 const RegionComunaSelects: React.FC<RegionComunaProps> = ({ 
@@ -17,17 +19,25 @@ const RegionComunaSelects: React.FC<RegionComunaProps> = ({
     currentRegion, 
     currentComuna 
 }) => {
+    const [regiones, setRegiones] = useState<RegionData[]>([]);
     const [comunasDisponibles, setComunasDisponibles] = useState<string[]>([]);
-    const regiones: { region: string, comunas: string[] }[] = regionesData.regiones;
 
-    // Efecto para inicializar comunas cuando la región cambia (o al cargar)
+    // Cargar regiones desde el JSON en public/data/chileGeo.json
+    useEffect(() => {
+        fetch('/data/chileGeo.json')
+            .then(res => res.json())
+            .then(data => setRegiones(data.regiones))
+            .catch(() => setRegiones([]));
+    }, []);
+
+    // Actualizar comunas cuando cambia la región
     useEffect(() => {
         const regionEncontrada = regiones.find(r => r.region === currentRegion);
         if (regionEncontrada) {
             setComunasDisponibles(regionEncontrada.comunas);
         } else {
             setComunasDisponibles([]);
-            onComunaChange(""); // Limpiar comuna si la región no es válida
+            onComunaChange("");
         }
     }, [currentRegion, onComunaChange, regiones]);
     

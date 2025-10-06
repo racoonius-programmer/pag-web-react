@@ -30,8 +30,8 @@ const Header: React.FC = () => {
         // Aseguramos el tipado correcto
         const productos: Producto[] = productosDB as Producto[];
         
-        // 1. Extrae solo el campo 'categoria'
-        const todasLasCategorias = productos.map(p => p.categoria);
+        // 1. Extrae solo el campo 'categoria' y filtra los undefined
+        const todasLasCategorias = productos.map(p => p.categoria).filter((cat): cat is string => typeof cat === 'string');
         
         // 2. Filtra para obtener solo los valores únicos
         return Array.from(new Set(todasLasCategorias));

@@ -13,6 +13,7 @@ import SobreLevelUp from "./pages/SobreLevelUp";
 import ProductoCarrito from "./pages/ProductsCarrito";
 import ProductShop from "./pages/ProductShop";
 import Events from "./pages/Events";
+import ProductDetail from "./pages/ProductDetail";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
@@ -36,6 +37,7 @@ const App: React.FC = () => {
             {/* 🔹 Secciones informativas */}
             <Route path="/sobreLEVEL-UP" element={<SobreLevelUp />} />
             <Route path="/productos" element={<ProductShop />} />
+            <Route path="/productos/:codigo" element={<ProductDetail />} />
             <Route path="/eventos" element={<Events />} />
 
             {/* 🔹 Autenticación */}

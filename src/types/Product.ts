@@ -4,22 +4,27 @@
 export interface Producto {
   codigo: string;
   nombre: string;
-  imagen: string;
+  imagen?: string;
   precio: number;
-  fabricante: string;
-  distribuidor: string;
-  Marca: string;
-  Material: string;
-  Descripcion: string;
-  enlace: string;
-  categoria: 
-    | "figuras"
-    | "juegos_de_mesa"
-    | "accesorios"
-    | "consolas"
-    | "pc_gamer"
-    | "sillas_gamer"
-    | "mouse"
-    | "mousepad"
-    | "poleras_personalizadas";
+  fabricante?: string;
+  distribuidor?: string;
+  Marca?: string;
+  Material?: string;
+  Descripcion?: string;
+  enlace?: string;
+  categoria?: string;
+  // Permite campos extra sin romper el tipado
+  [key: string]: any;
+}
+
+export type Productos = Producto[];
+
+/**
+ * Define la estructura de un comentario sobre un producto.
+ */
+export interface Comentario {
+  usuario: string;
+  calificacion: number; // 1..5
+  texto: string;
+  fecha: string; // ISO o formato legible
 }

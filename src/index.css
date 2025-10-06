@@ -156,3 +156,39 @@ main {
     border-color: #1E90FF;
     background-color: #1E90FF;
 }
+
+.card {
+  height: 100%;
+}
+
+/* Asegura que la imagen ocupe todo el ancho de la tarjeta y se recorte manteniendo proporción */
+.card .card-img-top {
+  width: 100%;
+  height: 250px;        /* alto fijo (ajusta si quieres otro tamaño) */
+  object-fit: cover;    /* rellena y recorta si es necesario */
+  display: block;
+}
+
+/* Compact: si quieres imágenes cuadradas usa aspect-ratio */
+@media (min-width: 768px) {
+  .card .card-img-top {
+    aspect-ratio: 1 / 1; /* fuerza relación cuadrada */
+    height: auto;        /* aspect-ratio controla la altura */
+    max-height: 250px;   /* límite para pantallas grandes */
+  }
+}
+
+/* Si usas enlaces que envuelven la imagen */
+.link-completo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.card-link {
+    display: block;
+    text-decoration: none; 
+    color: inherit; 
+}
+

@@ -64,10 +64,10 @@ const BannerBienvenida: React.FC = () => {
                 <div>
                     <h2 className="text-light mb-2">¡Bienvenido!</h2>
                     <p className="text-light mb-0">
-                        Para una mejor experiencia, por favor
-                        <Link to="/login" className="text-primary text-decoration-underline ms-1">inicia sesión</Link>
-                        o
-                        <Link to="/register" className="text-success text-decoration-underline ms-1">regístrate</Link>.
+                        Para una mejor experiencia, por favor,{' '}
+                        <Link to="/login" className="text-primary text-decoration-underline">inicia sesión</Link>{' '}
+                        o{' '}
+                        <Link to="/register" className="text-success text-decoration-underline">regístrate</Link>.
                     </p>
                 </div>
                 <div>

@@ -55,7 +55,12 @@ const calculateAge = (today: Date, birthDateStr: string): number => {
 // CUSTOM HOOK: useRegistroForm
 // ----------------------------------------------------------------------
 
-export function useRegistroForm(region: string, comuna: string, showModal?: (msg: string, title?: string, cb?: () => void) => void) {
+export function useRegistroForm(
+  region: string,
+  comuna: string,
+  showModal?: (msg: string, title?: string, cb?: () => void) => void,
+  navigateFn?: (path: string) => void
+) {
     const today = useMemo(() => new Date(), []);
 
     // 🚨 1. ESTADO ADICIONAL: Controla si el usuario ha interactuado
@@ -306,7 +311,14 @@ export function useRegistroForm(region: string, comuna: string, showModal?: (msg
             showModal(
                 "¡Registro exitoso! Serás redirigido a la página principal.",
                 "Registro Exitoso",
-                () => { window.location.href = "/main"; } // o usa useNavigate si prefieres
+                () => {
+                    // si se pasó navigate desde el componente, usarlo; si no fallback a window.location
+                    if (navigateFn) {
+                        navigateFn(redirectPath);
+                    } else {
+                        window.location.href = redirectPath;
+                    }
+                }
             );
         }
 
@@ -321,4 +333,4 @@ export function useRegistroForm(region: string, comuna: string, showModal?: (msg
         handleSubmit: handleRegistroSubmit, // 🚨 Renombrado a handleSubmit para el uso en el componente
         maxDate,
     };
-}
+ }

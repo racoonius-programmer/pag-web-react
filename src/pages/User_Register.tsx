@@ -29,7 +29,7 @@ const UserRegister: React.FC = () => {
     isFormTouched,
     handleChange,
     handleSubmit,
-  } = useRegistroForm(selectedRegion, selectedComuna, modal.showModal);
+  } = useRegistroForm(selectedRegion, selectedComuna, modal.showModal, navigate);
 
   const [showPassword, setShowPassword] = useState({
     contrasena: false,
@@ -60,22 +60,14 @@ const UserRegister: React.FC = () => {
     return '';
   };
 
-  const onFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    handleSubmit(e);
-    modal.showModal('¡Registro exitoso!', 'Tu cuenta ha sido creada correctamente.');
-    setTimeout(() => {
-      modal.handleClose();
-      navigate('/login');
-    }, 1500);
-  };
-  
-  return (
+  // Usar directamente handleSubmit del hook (el hook muestra el modal y hace redirección)
+ 
+   return (
     <div className="container-fluid bg-dark text-white p-5 min-vh-100 d-flex justify-content-center align-items-center">
       <div className="card bg-dark border-0 p-4" style={{ maxWidth: '500px', width: '100%' }}>
         <h2 className="text-center mb-4 text-light fw-bold">Registro de Usuario</h2>
 
-        <form id="registroForm" onSubmit={onFormSubmit} noValidate>
+        <form id="registroForm" onSubmit={handleSubmit} noValidate>
           {/* Correo */}
           <InputWithValidation
             id="correo"
@@ -214,10 +206,6 @@ const UserRegister: React.FC = () => {
           </p>
         </form>
 
-        {/* Botón de prueba para modal */}
-        <button onClick={() => modal.showModal('¡Funciona!', 'Prueba')} className="btn btn-outline-light mt-3">
-          Probar Modal
-        </button>
       </div>
 
       {/* Modal global */}

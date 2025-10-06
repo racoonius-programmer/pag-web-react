@@ -40,7 +40,8 @@ const Header: React.FC = () => {
     const handleCerrarSesion = (e: React.MouseEvent) => {
         e.preventDefault();
         localStorage.removeItem("usuarioActual");
-        navigate("/main"); 
+        // Forzar recarga completa y navegar a /main
+        window.location.href = '/main';
     };
 
     return (

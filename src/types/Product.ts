@@ -1,7 +1,7 @@
 /**
  * Define la estructura de un producto extraído de la base de datos simulada (productos.json).
  */
-export interface Producto {
+export interface Product { // ¡Cambiamos a Product!
   codigo: string;
   nombre: string;
   imagen?: string;
@@ -17,11 +17,12 @@ export interface Producto {
   [key: string]: any;
 }
 
-export type Productos = Producto[];
+// Opcional: Si necesitas un array de productos
+export type Products = Product[];
 
 /**
- * Define la estructura de un comentario sobre un producto.
- */
+* Define la estructura de un comentario sobre un producto.
+*/
 export interface Comentario {
   usuario: string;
   calificacion: number; // 1..5

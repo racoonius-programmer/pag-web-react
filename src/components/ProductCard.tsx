@@ -1,58 +1,59 @@
-// src/components/ProductCard.tsx
 
 import React from 'react';
-// Importamos el tipo 'Product' desde la carpeta types
-import type { Product } from '../types/Product'; 
-// Importamos el hook que nos da acceso a la lógica del carrito
-import { useCartContext } from '../hooks/UseCart'; 
+import { Link, useNavigate } from 'react-router-dom';
+import type { Product } from '../types/Product';
+import { usarDescuento } from '../hooks/Descuentos';
+import { useCartContext } from '../hooks/UseCart';
 
-interface ProductCardProps {
-    product: Product; // El componente recibe un producto para mostrar
+interface ProductoCardProps {
+    producto: Product;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-    // 1. Obtener la función 'addToCart' del contexto
+const ProductoCard: React.FC<ProductoCardProps> = ({ producto }) => {
+    const { precioFinal, tieneDescuento } = usarDescuento(producto);
     const { addToCart } = useCartContext();
+    const navigate = useNavigate();
+    const detailPath = `/productos/${producto.codigo}`;
 
-    // 2. Manejador de evento para el botón
-    const handleAddToCart = () => {
-        // Llama a la función addToCart, añadiendo 1 unidad del producto actual.
-        addToCart(product, 1);
-        
-        // Opcional: Proporciona feedback al usuario
-        console.log(`Producto ${product.nombre} añadido al carrito.`);
-        // Dependiendo de tu UI, puedes usar un Toast o un Modal aquí.
+    const handleAddToCart = (e: React.MouseEvent) => {
+        e.preventDefault();
+        addToCart(producto, 1);
+        navigate('/carrito');
     };
 
     return (
-        <div className="product-card card shadow-sm">
-            {/* Detalles del Producto */}
-            <img 
-                src={product.imagen || 'placeholder.jpg'} // Usa una imagen placeholder si no hay
-                className="card-img-top" 
-                alt={product.nombre}
-                style={{ height: '200px', objectFit: 'cover' }}
-            />
-            <div className="card-body">
-                <h5 className="card-title">{product.nombre}</h5>
-                <p className="card-text text-muted small">{product.Descripcion?.substring(0, 50)}...</p>
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                    <span className="fw-bold fs-5 text-success">
-                        ${product.precio.toLocaleString('es-ES')}
-                    </span>
-                    <span className="badge bg-info">{product.categoria}</span>
+        <Link to={detailPath} className="card-link text-decoration-none">
+            <div className="card h-100 d-flex flex-column bg-dark text-light border-secondary" style={{ minWidth: '270px', maxWidth: '320px', height: '420px' }}>
+                <div style={{ width: '100%', height: '180px', background: '#222', borderRadius: '8px', overflow: 'hidden', marginBottom: '10px' }}>
+                    <img 
+                        src={producto.imagen} 
+                        alt={producto.nombre}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }}
+                    />
                 </div>
-                
-                {/* 3. Botón para añadir al carrito */}
-                <button 
-                    className="btn btn-primary w-100"
-                    onClick={handleAddToCart}
-                >
-                    <i className="bi bi-cart-plus me-2"></i> Añadir al Carrito
-                </button>
+                <div className="card-body d-flex flex-column" style={{ flex: 1 }}>
+                    <h4 className="card-title text-white" style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>{producto.nombre}</h4>
+                    <p className="card-text text-secondary roboto fs-6" style={{ fontSize: '0.95rem', marginBottom: '0.5rem' }}>
+                        Código: {producto.codigo} <br />
+                        Fabricante: {producto.fabricante} <br />
+                        Distribuidor: {producto.distribuidor}
+                    </p>
+                    <div className="mt-auto d-flex justify-content-between align-items-center pt-2">
+                        <Link to={detailPath} className="btn btn-outline-primary">Ver Detalle</Link>
+                        <div style={{ backgroundColor: '#1E90FF' }} className="btn text-white fw-bold">
+                            ${precioFinal.toLocaleString('es-ES')}
+                            {tieneDescuento && (
+                                <small className="text-warning fw-normal ms-2">(-20%)</small>
+                            )}
+                        </div>
+                    </div>
+                    <button className="btn btn-success mt-3 w-100" onClick={handleAddToCart}>
+                        <i className="bi bi-cart-plus me-2"></i> Añadir al Carrito y ver carrito
+                    </button>
+                </div>
             </div>
-        </div>
+        </Link>
     );
-};
+}
 
-export default ProductCard;
+export default ProductoCard;

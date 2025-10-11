@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 // 1. Importa los tipos desde sus nuevos archivos
-import type { Producto } from '../types/Product'; 
+import type { Product } from '../types/Product'; 
 import type { UsuarioSesion } from '../types/User'; 
 
 // Importa la base de datos simulada
@@ -28,7 +28,7 @@ const Header: React.FC = () => {
     // 2. LÓGICA PARA OBTENER CATEGORÍAS ÚNICAS (Solo se recalcula si productosDB cambia, que es poco probable)
     const categoriasUnicas: string[] = useMemo(() => {
         // Aseguramos el tipado correcto
-        const productos: Producto[] = productosDB as Producto[];
+        const productos: Product[] = productosDB as Product[];
         
         // 1. Extrae solo el campo 'categoria' y filtra los undefined
         const todasLasCategorias = productos.map(p => p.categoria).filter((cat): cat is string => typeof cat === 'string');

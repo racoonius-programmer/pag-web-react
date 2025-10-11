@@ -14,6 +14,8 @@ import ProductoCarrito from "./pages/ProductsCarrito";
 import ProductShop from "./pages/ProductShop";
 import Events from "./pages/Events";
 import ProductDetail from "./pages/ProductDetail";
+import Payment from "./pages/Payment";
+import UserPerfil from "./pages/UserPerfil";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
@@ -44,8 +46,11 @@ const App: React.FC = () => {
             <Route path="/login" element={<LoginScreen />} />
             <Route path="/register" element={<UserRegisterPage />} />
 
-            {/* 🔹 Carrito */}
+
+            {/* 🔹 Carrito, Pago y Perfil */}
             <Route path="/carrito" element={<ProductoCarrito />} />
+            <Route path="/payment" element={<Payment />} />
+            <Route path="/perfil" element={<UserPerfil />} />
 
             {/* 🔹 RUTA 404 */}
             <Route

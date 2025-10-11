@@ -1,13 +1,21 @@
 import React, { useEffect, useState } from 'react';
+import { useCartContext } from '../hooks/UseCart';
 import { useNavigate, useParams } from 'react-router-dom';
 import productosData from '../data/productos.json';
-import type { Producto, Comentario } from '../types/Product';
+import type { Product, Comentario } from '../types/Product';
 
 const ProductDetail: React.FC = () => {
   const { codigo } = useParams<{ codigo: string }>();
   const navigate = useNavigate();
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [codigo]);
 
-  const productos: Producto[] = (productosData as any).productos || (productosData as any);
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [codigo]);
+
+  const productos: Product[] = (productosData as any).productos || (productosData as any);
 
   const producto = productos.find((p) => p.codigo === codigo);
 
@@ -59,28 +67,17 @@ const ProductDetail: React.FC = () => {
   const decrease = () => setCantidad((q) => Math.max(1, q - 1));
   const increase = () => setCantidad((q) => q + 1);
 
+  const { addToCart } = useCartContext();
   const agregarAlCarrito = () => {
     if (!usuarioLogueado) {
       navigate('/login');
       return;
     }
-
-    const carrito = JSON.parse(localStorage.getItem('carrito') || '[]') as any[];
-    const index = carrito.findIndex((item) => item.codigo === producto.codigo);
-    if (index !== -1) {
-      carrito[index].cantidad = (carrito[index].cantidad || 0) + cantidad;
-    } else {
-      carrito.push({
-        codigo: producto.codigo,
-        nombre: producto.nombre,
-        precio: precioFinal,
-        imagen: producto.imagen,
-        Descripcion: producto.Descripcion,
-        Material: producto.Material,
-        cantidad,
-      });
-    }
-    localStorage.setItem('carrito', JSON.stringify(carrito));
+    addToCart({
+      ...producto,
+      precio: precioFinal,
+      cantidad,
+    }, cantidad);
     navigate('/carrito');
   };
 

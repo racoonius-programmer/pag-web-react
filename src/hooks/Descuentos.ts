@@ -1,6 +1,6 @@
 // src/hooks/useDescuento.ts
 import { useMemo } from 'react';
-import type { Producto } from '../types/Product';
+import type { Product } from '../types/Product';
 import type { UsuarioSesion } from '../types/User'; 
 
 /**
@@ -9,7 +9,7 @@ import type { UsuarioSesion } from '../types/User';
  * * @param producto El objeto del producto.
  * @returns Un objeto con el precio final (number) y un booleano (tieneDescuento).
  */
-export const usarDescuento = (producto: Producto) => {
+export const usarDescuento = (producto: Product) => {
     
     // Utilizamos useMemo para asegurar que este cálculo costoso solo se ejecute 
     // cuando el producto (o implícitamente, el usuario logueado) cambie.

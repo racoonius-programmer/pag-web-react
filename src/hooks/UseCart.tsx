@@ -1,10 +1,11 @@
 // ✅ src/hooks/useCart.ts
 // Hook y contexto global para gestionar el carrito de compras
 
-import { useState, useEffect, useContext, createContext, useMemo } from 'react';
+import React, { useState, useEffect, useContext, createContext, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import type { Product } from '../types/Product';
 import type { CartItem } from '../types/Cart';
+
 
 // ----------------------------------------------------------------------
 // 1️⃣ Tipo del contexto del carrito
@@ -99,12 +100,13 @@ const useCart = () => {
 // ----------------------------------------------------------------------
 // 4️⃣ Provider del contexto (se exporta)
 // ----------------------------------------------------------------------
+
 interface CartProviderProps {
   children: ReactNode;
 }
 
-export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
-  const cartFunctions = useCart(); // obtiene la lógica del carrito
+export const CartProvider: React.FC<CartProviderProps> = ({children}) => {
+  const cartFunctions = useCart();
 
   return (
     <CartContext.Provider value={cartFunctions}>
@@ -112,6 +114,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     </CartContext.Provider>
   );
 };
+
+
+
+
 
 // ----------------------------------------------------------------------
 // 5️⃣ Hook de consumo (el que usarás en tus componentes)

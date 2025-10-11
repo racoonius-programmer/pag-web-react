@@ -1,7 +1,7 @@
 // src/components/ProductosDestacados.tsx
 import React, { useMemo } from 'react';
 import ProductoCard from './ProductCard';
-import type { Producto } from '../types/Product';
+import type { Product } from '../types/Product';
 
 // Importa la base de datos de productos (asumiendo que está en data/)
 import productosDB from '../data/productos.json';
@@ -10,7 +10,7 @@ const ProductosDestacados: React.FC = () => {
 
     // 1. Lógica para seleccionar 3 productos al azar (Migrada desde Vanilla JS)
     const productosSeleccionados = useMemo(() => {
-        const productos: Producto[] = productosDB as Producto[];
+        const productos: Product[] = productosDB as Product[];
 
         // Si la lista está vacía, no hagas nada
         if (productos.length === 0) {
@@ -37,10 +37,11 @@ const ProductosDestacados: React.FC = () => {
             </h1>
             <div className="container py-5">
                 {productosSeleccionados.length > 0 ? (
-                    // Mapea los productos seleccionados y renderiza el componente Card
-                    <div className="row justify-content-center" id="mas-vendidos">
+                    <div className="d-flex flex-row justify-content-center overflow-auto gap-4 px-2" id="mas-vendidos" style={{scrollSnapType:'x mandatory'}}>
                         {productosSeleccionados.map(producto => (
-                            <ProductoCard key={producto.codigo} producto={producto} />
+                            <div style={{ minWidth: '320px', scrollSnapAlign:'start', margin: '0 auto' }} key={producto.codigo}>
+                                <ProductoCard producto={producto} />
+                            </div>
                         ))}
                     </div>
                 ) : (

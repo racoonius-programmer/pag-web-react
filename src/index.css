@@ -174,7 +174,8 @@ main {
   .card .card-img-top {
     aspect-ratio: 1 / 1; /* fuerza relación cuadrada */
     height: auto;        /* aspect-ratio controla la altura */
-    max-height: 250px;   /* límite para pantallas grandes */
+    max-height: 350px;   /* límite para pantallas grandes */
+    max-width: 500px;
   }
 }
 
@@ -186,9 +187,159 @@ main {
   display: block;
 }
 
-.card-link {
-    display: block;
-    text-decoration: none; 
-    color: inherit; 
+/* Sidebar de filtros: evita que rompa el layout, hazlo sticky y con scroll interno */
+.sidebar-filters {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background: rgba(30, 30, 30, 0.95); /* conserva estilo oscuro */
+  max-height: calc(100vh - 120px); /* espacio para header/footer */
+  overflow-y: auto;
+  position: sticky;
+  top: 20px;
+  box-sizing: border-box;
+}
+
+/* Ajustes internos para que los controles ocupen el ancho correctamente */
+.sidebar-filters .form-check {
+  position: relative;        /* necesario para que el input absolute quede dentro */
+  display: block;
+  padding-left: 1.5rem;      /* restablece espacio para el checkbox */
+  margin-bottom: 0.5rem;
+  align-items: center;
+}
+
+.sidebar-filters .form-check-input {
+  position: absolute;        /* tal como en Bootstrap */
+  left: 0.25rem;
+  top: 0.35rem;
+  margin: 0;
+}
+
+.sidebar-filters .form-check-label {
+  margin: 0;
+  color: #ddd;
+  display: block;
+}
+
+/* Sidebar filters: posición y espacio esperados por Bootstrap */
+.sidebar-filters {
+  box-sizing: border-box;
+  padding: 1rem;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+}
+
+/* Cada fila de opción mantiene posición relativa para el checkbox absolute */
+.sidebar-filters .form-check {
+  position: relative;         /* necesario para el input position:absolute */
+  display: block;
+  padding-left: 2.25rem;      /* espacio para el checkbox + separación */
+  margin-bottom: 0.5rem;
+  align-items: center;
+  min-height: 1.8rem;         /* evita colapsos cuando las etiquetas envuelven */
+}
+
+/* Checkbox dentro del contenedor: tamaño y ubicación */
+.sidebar-filters .form-check-input {
+  position: absolute;
+  left: 0.5rem;               /* ajusta la distancia desde el borde */
+  top: 0.35rem;               /* alinea verticalmente con el texto */
+  width: 1.05rem;
+  height: 1.05rem;
+  margin: 0;
+  transform: none;            /* evita escalados inesperados */
+}
+
+/* Etiqueta: ocupa el resto del espacio y no introduce saltos extra */
+.sidebar-filters .form-check-label {
+  display: block;
+  margin: 0;
+  color: #ddd;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+/* Si el checkbox está dentro de un control personalizado (bootstrap) */
+.sidebar-filters .form-check .form-check-input:focus {
+  box-shadow: none;
+}
+
+/* Asegura que el scroll no tape contenido */
+.sidebar-filters {
+  padding-right: 0.75rem;
+}
+
+/* Tarjeta con altura fija (ajusta la altura total aquí) */
+.product-card-fixed {
+  height: 460px;               /* altura fija total de la tarjeta */
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  max-width: 320px; /* ancho máximo deseado */
+  width: 100%;      /* ocupa hasta el max-width */
+  margin: 0 auto;   /* centra dentro de la columna */
+}
+
+/* Wrapper fijo para imagen de producto (altura configurable por variable CSS) */
+.product-image-wrapper {
+  width: 100%;
+  height: var(--product-image-height, 300px); /* default 200px */
+  overflow: hidden;
+  background: #222;
+}
+
+/* Imagen: rellena y se recorta */
+.product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Card body se ajusta dentro de la tarjeta y permite scroll si el contenido es demasiado largo */
+.product-card-fixed .card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+
+/* Si por alguna razón el texto ocupa mucho, permitir scroll en la parte media */
+.product-card-fixed .card-body .card-text,
+.product-card-fixed .card-body p {
+  max-height: 6.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Badge de precio */
+.precio-badge {
+  background-color: #1e90ff;
+  border-radius: 6px;
+}
+
+/* Centrado vertical de checkbox + texto dentro del panel de filtros */
+.sidebar-filters .form-check {
+  display: flex;
+  align-items: center;   /* centra verticalmente checkbox y label */
+  gap: 0.6rem;
+  padding-left: 0;       /* ya no necesitamos espacio para input absolute */
+  margin-bottom: 0.5rem;
+  min-height: 1.8rem;
+}
+
+.sidebar-filters .form-check-input {
+  position: static;      /* evitar position:absolute dentro del sidebar */
+  width: 1.05rem;
+  height: 1.05rem;
+  margin: 0;
+  flex: 0 0 auto;
+}
+
+.sidebar-filters .form-check-label {
+  margin: 0;
+  line-height: 1.2;
+  color: #ddd;
 }
 

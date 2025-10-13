@@ -11,6 +11,8 @@ interface ProductoCardProps {
     fixed?: boolean;
 }
 
+
+
 const ProductoCard: React.FC<ProductoCardProps> = ({ producto, esDuoc, imageHeight, fixed = false }) => {
     const descuentoHook = usarDescuento(producto);
     const precioOriginal = producto.precio || 0;

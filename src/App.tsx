@@ -19,6 +19,7 @@ import UserPerfil from "./pages/UserPerfil";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import Contact from "./pages/Contact";
 
 const App: React.FC = () => {
   return (
@@ -41,6 +42,7 @@ const App: React.FC = () => {
             <Route path="/productos" element={<ProductShop />} />
             <Route path="/productos/:codigo" element={<ProductDetail />} />
             <Route path="/eventos" element={<Events />} />
+            <Route path="/contacto" element={<Contact/>} />
 
             {/* 🔹 Autenticación */}
             <Route path="/login" element={<LoginScreen />} />

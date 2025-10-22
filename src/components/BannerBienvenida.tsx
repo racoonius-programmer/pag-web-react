@@ -41,7 +41,7 @@ const BannerBienvenida: React.FC = () => {
 
         const botonesAccion = isAdmin 
             ? (
-                <Link to="/admin" className="btn btn-danger me-2">Panel de Administración</Link>
+                <Link to="/admin_main" className="btn btn-danger me-2">Panel de Administración</Link>
             )
             : (
                 <>

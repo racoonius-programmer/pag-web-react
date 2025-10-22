@@ -63,11 +63,17 @@ const ProductShop: React.FC = () => {
 
     // --- 2. GENERACIÓN DE DATOS ÚNICOS PARA FILTROS ---
     const datosUnicos = useMemo(() => {
-        // Uso de type assertion para ayudar a TypeScript, asumiendo que fabricante/distribuidor son string si existen
-        const fabricantes: string[] = Array.from(new Set(todosLosProductos.map(p => p.fabricante).filter(Boolean))) as string[];
-        const distribuidores: string[] = Array.from(new Set(todosLosProductos.map(p => p.distribuidor).filter(Boolean))) as string[];
+        // Primero filtrar por categoría si existe el parámetro
+        let productosParaFiltros = [...todosLosProductos];
+        if (categoriaParam) {
+            productosParaFiltros = productosParaFiltros.filter(p => p.categoria === categoriaParam);
+        }
+        
+        // Luego generar los datos únicos solo de los productos filtrados por categoría
+        const fabricantes: string[] = Array.from(new Set(productosParaFiltros.map(p => p.fabricante).filter(Boolean))) as string[];
+        const distribuidores: string[] = Array.from(new Set(productosParaFiltros.map(p => p.distribuidor).filter(Boolean))) as string[];
         return { fabricantes, distribuidores };
-    }, [todosLosProductos]);
+    }, [todosLosProductos, categoriaParam]);
 
     // --- 3. LÓGICA CENTRAL DE FILTRADO Y ORDENAMIENTO ---
     useEffect(() => {

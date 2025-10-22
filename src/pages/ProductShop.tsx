@@ -3,15 +3,10 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import ProductoCard from '../components/ProductCard';
 import type { Product } from '../types/Product';
-
-// Importa la base de datos de productos (asumiendo que está en data/)
-import productosDB from '../data/productos.json';
+import { useProducts } from '../hooks/UseProducts';
 
 // Importa el tipo de usuario (para una mejor tipificación)
 import type { Usuario } from '../types/User';
-
-// Función para obtener la lista base de productos
-const getProductosBase = (): Product[] => productosDB as Product[];
 
 // ✅ CÓDIGO ARREGLADO: Función auxiliar para obtener el usuario
 const getUsuarioDB = (): Usuario | null => {
@@ -42,9 +37,9 @@ const getUsuarioDB = (): Usuario | null => {
 
 const ProductShop: React.FC = () => {
     const location = useLocation();
+    const { productos: todosLosProductos } = useProducts(); // Usar el hook personalizado
 
-    // Obtiene todos los productos de la DB y calcula el precio máximo una sola vez
-    const todosLosProductos: Product[] = useMemo(getProductosBase, []);
+    // Calcular el precio máximo usando los productos del hook
     const precioMaximoGlobal = useMemo(() => {
         if (todosLosProductos.length === 0) return 100000;
         return Math.max(...todosLosProductos.map(p => p.precio));

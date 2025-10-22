@@ -20,6 +20,7 @@ import UserPerfil from "./pages/UserPerfil";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import Contact from "./pages/Contact";
+import Admin_Inicio from "./pages/Admin_Inicio";
 
 const App: React.FC = () => {
   return (
@@ -37,6 +38,9 @@ const App: React.FC = () => {
             <Route path="/" element={<MainScreen />} />
             <Route path="/main" element={<MainScreen />} />
 
+            {/* Admin*/}
+            <Route path="/admin_main" element={<Admin_Inicio/>} />
+
             {/* 🔹 Secciones informativas */}
             <Route path="/sobreLEVEL-UP" element={<SobreLevelUp />} />
             <Route path="/productos" element={<ProductShop />} />
@@ -47,6 +51,8 @@ const App: React.FC = () => {
             {/* 🔹 Autenticación */}
             <Route path="/login" element={<LoginScreen />} />
             <Route path="/register" element={<UserRegisterPage />} />
+
+            
 
 
             {/* 🔹 Carrito, Pago y Perfil */}

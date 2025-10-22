@@ -28,7 +28,14 @@ const ProductoCard: React.FC<ProductoCardProps> = ({ producto, esDuoc, imageHeig
     const handleAddToCart = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        addToCart(producto, 1);
+        
+        // Crear una copia del producto con el precio final (con descuento si aplica)
+        const productoConPrecioFinal = {
+            ...producto,
+            precio: precioFinal // Usar el precio final calculado (con descuento DUOC si aplica)
+        };
+        
+        addToCart(productoConPrecioFinal, 1);
         navigate('/carrito');
     };
 

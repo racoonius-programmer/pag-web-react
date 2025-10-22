@@ -73,11 +73,14 @@ const ProductDetail: React.FC = () => {
       navigate('/login');
       return;
     }
-    addToCart({
+    
+    // Crear el producto con el precio final (con descuento si aplica)
+    const productoConPrecioFinal = {
       ...producto,
-      precio: precioFinal,
-      cantidad,
-    }, cantidad);
+      precio: precioFinal // Usar el precio final calculado (con descuento DUOC si aplica)
+    };
+    
+    addToCart(productoConPrecioFinal, cantidad);
     navigate('/carrito');
   };
 

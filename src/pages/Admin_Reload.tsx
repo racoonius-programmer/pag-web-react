@@ -1,8 +1,7 @@
-// src/pages/Admin_Inicio.tsx
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const Admin_Inicio: React.FC = () => {
+const Admin_Reload: React.FC = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -22,4 +21,4 @@ const Admin_Inicio: React.FC = () => {
     );
 };
 
-export default Admin_Inicio;
+export default Admin_Reload;

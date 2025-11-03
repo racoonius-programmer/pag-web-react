@@ -20,12 +20,12 @@ import UserPerfil from "./pages/UserPerfil";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import Contact from "./pages/Contact";
-import Admin_Inicio from "./pages/Admin_Inicio";
 
 import Admin_Layout from './pages/admin/Admin_Layout';
 import Admin_Dashboard from './pages/admin/Admin_Dashboard';
 import Admin_Users from './pages/admin/Admin_Users';
 import Admin_Products from './pages/admin/Admin_Products';
+import Admin_Reload from "./pages/Admin_Reload";
 
 const App: React.FC = () => {
   return (
@@ -44,7 +44,7 @@ const App: React.FC = () => {
             <Route path="/main" element={<MainScreen />} />
 
             {/* Admin*/}
-            <Route path="/admin_main" element={<Admin_Inicio/>} />
+            <Route path="/admin_main" element={<Admin_Reload/>} />
             <Route path="/admin" element={<Admin_Layout />}>
               <Route index element={<Admin_Dashboard />} />
               <Route path="users" element={<Admin_Users />} />

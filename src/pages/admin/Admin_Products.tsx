@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import type { Product } from '../../types/Product';
 import { useProducts } from '../../hooks/UseProducts';
 import ProductFormModal from '../../components/ProductFormModal';
+import Modal from '../../components/Modal';
+import { useModal } from '../../hooks/Modal';
 
 const Admin_Products: React.FC = () => {
     const { productos, addProduct, updateProduct, deleteProduct, cloneProduct } = useProducts();
@@ -11,10 +13,24 @@ const Admin_Products: React.FC = () => {
     const [filterCategory, setFilterCategory] = useState<string>('all');
     const [filterPriceRange, setFilterPriceRange] = useState<'all' | 'low' | 'medium' | 'high'>('all');
     
-    // Estados para el modal
+    // Estados para el modal de formulario
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
     const [productToEdit, setProductToEdit] = useState<Product | null>(null);
+
+    // Estados para modales de confirmación y mensajes
+    const { modalState, showModal, handleClose } = useModal();
+    const [confirmModal, setConfirmModal] = useState<{
+        show: boolean;
+        title: string;
+        message: string;
+        onConfirm: () => void;
+    }>({
+        show: false,
+        title: '',
+        message: '',
+        onConfirm: () => {}
+    });
 
     const formatCategoria = (categoria: string): string => {
         return categoria.replace(/_/g, ' ').split(' ').map(word => 
@@ -22,13 +38,11 @@ const Admin_Products: React.FC = () => {
         ).join(' ');
     };
 
-    // Obtener categorías únicas
     const getUniqueCategories = () => {
         const categories = new Set(productos.map(p => p.categoria).filter(Boolean));
         return Array.from(categories);
     };
 
-    // Filtrar productos
     const filteredProducts = productos.filter(product => {
         const matchesSearch = product.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
                              product.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -61,7 +75,6 @@ const Admin_Products: React.FC = () => {
         return stats;
     };
 
-    // Handlers para el modal
     const handleAddProduct = () => {
         setModalMode('add');
         setProductToEdit(null);
@@ -77,30 +90,44 @@ const Admin_Products: React.FC = () => {
     const handleCloneProduct = (codigo: string) => {
         const cloned = cloneProduct(codigo);
         if (cloned) {
-            alert(`Producto "${cloned.nombre}" clonado exitosamente!`);
+            showModal(
+                `Producto "${cloned.nombre}" clonado exitosamente con código "${cloned.codigo}"`,
+                'Producto Clonado'
+            );
         } else {
-            alert('Error al clonar el producto');
+            showModal('Error al clonar el producto. Por favor, intenta nuevamente.', 'Error');
         }
     };
 
     const handleDeleteProduct = (codigo: string, nombre: string) => {
-        if (window.confirm(`¿Estás seguro de que quieres eliminar "${nombre}"?`)) {
-            deleteProduct(codigo);
-            if (selectedProduct && selectedProduct.codigo === codigo) {
-                setSelectedProduct(null);
+        setConfirmModal({
+            show: true,
+            title: 'Confirmar Eliminación',
+            message: `¿Estás seguro de que quieres eliminar "${nombre}"? Esta acción no se puede deshacer.`,
+            onConfirm: () => {
+                deleteProduct(codigo);
+                if (selectedProduct && selectedProduct.codigo === codigo) {
+                    setSelectedProduct(null);
+                }
+                setConfirmModal({ show: false, title: '', message: '', onConfirm: () => {} });
+                showModal(`Producto "${nombre}" eliminado exitosamente`, 'Producto Eliminado');
             }
-            alert('Producto eliminado exitosamente');
-        }
+        });
     };
 
     const handleModalSubmit = (productData: Omit<Product, 'codigo'>) => {
         if (modalMode === 'add') {
             const newProduct = addProduct(productData);
-            alert(`Producto "${newProduct.nombre}" agregado exitosamente!`);
+            showModal(
+                `Producto "${newProduct.nombre}" agregado exitosamente con código "${newProduct.codigo}"`,
+                'Producto Agregado'
+            );
         } else if (modalMode === 'edit' && productToEdit) {
             updateProduct(productToEdit.codigo, productData);
-            alert(`Producto "${productData.nombre}" actualizado exitosamente!`);
-            // Actualizar el producto seleccionado si es el mismo que se editó
+            showModal(
+                `Producto "${productData.nombre}" actualizado exitosamente`,
+                'Producto Actualizado'
+            );
             if (selectedProduct && selectedProduct.codigo === productToEdit.codigo) {
                 setSelectedProduct({ ...productToEdit, ...productData });
             }
@@ -415,6 +442,52 @@ const Admin_Products: React.FC = () => {
                 product={productToEdit}
                 mode={modalMode}
             />
+
+            {/* Modal de mensajes (éxito/error) */}
+            <Modal
+                show={modalState.show}
+                title={modalState.title}
+                message={modalState.message}
+                onClose={handleClose}
+                onHiddenCallback={modalState.onHiddenCallback}
+            />
+
+            {/* Modal de confirmación */}
+            {confirmModal.show && (
+                <div className="modal fade show d-block" tabIndex={-1} style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">{confirmModal.title}</h5>
+                                <button 
+                                    type="button" 
+                                    className="btn-close" 
+                                    onClick={() => setConfirmModal({ show: false, title: '', message: '', onConfirm: () => {} })}
+                                ></button>
+                            </div>
+                            <div className="modal-body">
+                                <p>{confirmModal.message}</p>
+                            </div>
+                            <div className="modal-footer">
+                                <button 
+                                    type="button" 
+                                    className="btn btn-secondary"
+                                    onClick={() => setConfirmModal({ show: false, title: '', message: '', onConfirm: () => {} })}
+                                >
+                                    Cancelar
+                                </button>
+                                <button 
+                                    type="button" 
+                                    className="btn btn-danger"
+                                    onClick={confirmModal.onConfirm}
+                                >
+                                    Confirmar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

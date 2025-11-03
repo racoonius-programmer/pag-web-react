@@ -1,4 +1,4 @@
-// src/components/Modal.tsx (Versión Final Corregida)
+// src/components/Modal.tsx (Versión con tema oscuro)
 
 import React, { useEffect, useRef } from 'react';
 
@@ -37,8 +37,6 @@ const Modal: React.FC<GlobalModalProps> = ({
 
       // Cuando Bootstrap haya ocultado el modal, ejecutar el callback guardado
       modalRef.current.addEventListener('hidden.bs.modal', () => {
-        // primero llamar onClose (si necesitas sincronizar estado)
-        // NOTA: no llamamos onClose aquí porque onClose normalmente ya oculta el modal.
         // Ejecutar el callback de after-close
         if (onHiddenRef.current) {
           try { onHiddenRef.current(); } catch (e) { console.error(e); }
@@ -62,22 +60,22 @@ const Modal: React.FC<GlobalModalProps> = ({
   }, [show]);
 
   return (
-    <div className="modal fade" tabIndex={-1} ref={modalRef} aria-labelledby="modalTitle" aria-hidden="true">
+    <div className="modal fade" tabIndex={-1} ref={modalRef} aria-labelledby="modalTitle" aria-hidden="true" data-bs-theme="dark">
       <div className="modal-dialog modal-dialog-centered">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 id="modalTitle" className="modal-title">{title}</h5>
-            <button type="button" className="btn-close" aria-label="Close" onClick={onClose}></button>
+        <div className="modal-content bg-dark text-light border-secondary">
+          <div className="modal-header border-secondary">
+            <h5 id="modalTitle" className="modal-title text-light">{title}</h5>
+            <button type="button" className="btn-close btn-close-white" aria-label="Close" onClick={onClose}></button>
           </div>
           <div className="modal-body">
-            <p>{message}</p>
+            <p className="text-light mb-0">{message}</p>
           </div>
-          <div className="modal-footer">
+          <div className="modal-footer border-secondary">
             <button type="button" className="btn btn-secondary" onClick={onClose}>Cerrar</button>
             <button
               type="button"
               className="btn btn-primary"
-              onClick={onClose} // cerrar el modal; la redirección se ejecutará en hidden.bs.modal desde arriba
+              onClick={onClose}
             >
               Aceptar
             </button>

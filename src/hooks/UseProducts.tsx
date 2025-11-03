@@ -1,4 +1,3 @@
-// src/hooks/UseProducts.tsx
 import { useState, useEffect } from 'react';
 import type { Product } from '../types/Product';
 import productosDB from '../data/productos.json';

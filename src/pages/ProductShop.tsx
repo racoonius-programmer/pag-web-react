@@ -1,4 +1,3 @@
-// src/pages/ProductShop.tsx
 import React, { useState, useMemo, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import ProductoCard from '../components/ProductCard';
@@ -8,7 +7,7 @@ import { useProducts } from '../hooks/UseProducts';
 // Importa el tipo de usuario (para una mejor tipificación)
 import type { Usuario } from '../types/User';
 
-// ✅ CÓDIGO ARREGLADO: Función auxiliar para obtener el usuario
+// Función auxiliar para obtener el usuario
 const getUsuarioDB = (): Usuario | null => {
     const usuariosJSON = localStorage.getItem("usuarios");
     const usuarios: Usuario[] = usuariosJSON ? JSON.parse(usuariosJSON) : [];
@@ -41,13 +40,14 @@ const ProductShop: React.FC = () => {
 
     // Calcular el precio máximo usando los productos del hook
     const precioMaximoGlobal = useMemo(() => {
-        if (todosLosProductos.length === 0) return 100000;
+        if (todosLosProductos.length === 0) return 0;
         return Math.max(...todosLosProductos.map(p => p.precio));
     }, [todosLosProductos]);
 
-    // Extraemos el parámetro de URL
+    // Extraemos los parámetros de URL
     const urlParams = new URLSearchParams(location.search);
     const categoriaParam = urlParams.get('categoria');
+    const searchParam = urlParams.get('search');
 
     // --- 1. ESTADO DE FILTROS ---
     const [productos, setProductos] = useState<Product[]>([]); // Lista de productos a mostrar
@@ -55,6 +55,17 @@ const ProductShop: React.FC = () => {
     const [fabricantesSeleccionados, setFabricantesSeleccionados] = useState<string[]>([]);
     const [distribuidoresSeleccionados, setDistribuidoresSeleccionados] = useState<string[]>([]);
     const [criterioOrden, setCriterioOrden] = useState<string>("categoria");
+    const [terminoBusqueda, setTerminoBusqueda] = useState<string>(searchParam || '');
+
+    // Actualizar precio máximo cuando cambian los productos
+    useEffect(() => {
+        setPrecioMaximoSlider(precioMaximoGlobal);
+    }, [precioMaximoGlobal]);
+
+    // Actualizar término de búsqueda cuando cambia la URL
+    useEffect(() => {
+        setTerminoBusqueda(searchParam || '');
+    }, [searchParam]);
 
     // --- 2. GENERACIÓN DE DATOS ÚNICOS PARA FILTROS ---
     const datosUnicos = useMemo(() => {
@@ -74,39 +85,49 @@ const ProductShop: React.FC = () => {
     useEffect(() => {
         let productosFiltradosTemp = [...todosLosProductos];
 
-        // 1. FILTRADO POR URL
+        // 1. FILTRADO POR URL (CATEGORÍA)
         if (categoriaParam) {
             productosFiltradosTemp = productosFiltradosTemp.filter(p => p.categoria === categoriaParam);
         }
 
-        // 2. FILTRADO POR PRECIO
+        // 2. FILTRADO POR BÚSQUEDA
+        if (terminoBusqueda.trim()) {
+            const termino = terminoBusqueda.toLowerCase();
+            productosFiltradosTemp = productosFiltradosTemp.filter(p => {
+                return (
+                    p.nombre.toLowerCase().includes(termino) ||
+                    p.codigo.toLowerCase().includes(termino) ||
+                    (p.fabricante && p.fabricante.toLowerCase().includes(termino)) ||
+                    (p.Descripcion && p.Descripcion.toLowerCase().includes(termino))
+                );
+            });
+        }
+
+        // 3. FILTRADO POR PRECIO
         productosFiltradosTemp = productosFiltradosTemp.filter(p => p.precio <= precioMaximoSlider);
 
-        // 3. FILTRADO POR FABRICANTE
+        // 4. FILTRADO POR FABRICANTE
         if (fabricantesSeleccionados.length > 0) {
-            // Se añade una comprobación para null/undefined por seguridad
             productosFiltradosTemp = productosFiltradosTemp.filter(p => fabricantesSeleccionados.includes(p.fabricante || ''));
         }
 
-        // 4. FILTRADO POR DISTRIBUIDOR
+        // 5. FILTRADO POR DISTRIBUIDOR
         if (distribuidoresSeleccionados.length > 0) {
-            // Se añade una comprobación para null/undefined por seguridad
             productosFiltradosTemp = productosFiltradosTemp.filter(p => distribuidoresSeleccionados.includes(p.distribuidor || ''));
         }
 
-        // 5. ORDENAMIENTO
+        // 6. ORDENAMIENTO
         const ordenar = (a: Product, b: Product) => {
             if (criterioOrden === "precio-asc") return a.precio - b.precio;
             if (criterioOrden === "precio-desc") return b.precio - a.precio;
             if (criterioOrden === "nombre-asc") return a.nombre.localeCompare(b.nombre);
             if (criterioOrden === "nombre-desc") return b.nombre.localeCompare(a.nombre);
-            // El orden 'mas-vendidos' o 'categoria' se simula aleatoriamente por simplicidad
             if (criterioOrden === "mas-vendidos") return Math.random() - 0.5;
-            return 0; // Por defecto
+            return 0;
         };
         productosFiltradosTemp.sort(ordenar);
 
-        // 6. ACTUALIZAR EL ESTADO
+        // 7. ACTUALIZAR EL ESTADO
         setProductos(productosFiltradosTemp);
 
     }, [
@@ -115,12 +136,12 @@ const ProductShop: React.FC = () => {
         precioMaximoSlider,
         fabricantesSeleccionados,
         distribuidoresSeleccionados,
-        criterioOrden
+        criterioOrden,
+        terminoBusqueda
     ]);
 
     // --- 4. HANDLERS DE EVENTOS ---
 
-    // ✅ CÓDIGO ARREGLADO: Se añade el radix 10 a parseInt
     const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setPrecioMaximoSlider(parseInt(e.target.value, 10));
     };
@@ -144,6 +165,7 @@ const ProductShop: React.FC = () => {
         setDistribuidoresSeleccionados([]);
         setPrecioMaximoSlider(precioMaximoGlobal);
         setCriterioOrden("categoria");
+        setTerminoBusqueda('');
     };
 
     // Función para formatear las categorías (replicada del Header)
@@ -161,12 +183,37 @@ const ProductShop: React.FC = () => {
 
     return (
         <div className="container py-5" data-bs-theme="dark">
-            <h1 className="text-light mb-4">Tienda de Productos {categoriaParam ? `(${formatearCategoria(categoriaParam)})` : ''}</h1>
+            <h1 className="text-light mb-4">
+                Tienda de Productos {categoriaParam ? `(${formatearCategoria(categoriaParam)})` : ''}
+            </h1>
             <div className="row gx-2 gy-3">
                 {/* SIDEBAR: ocupar 3 cols en md y lg */}
                 <div className="col-12 col-md-3 col-lg-3 d-flex flex-column align-items-stretch mb-4">
                     <aside className="sidebar-filters p-3 border rounded border-secondary bg-dark text-light">
-                        <h4 className="mb-3">Filtros</h4>
+                        <div className="d-flex justify-content-between align-items-center mb-3">
+                            <h4 className="m-0">Filtros</h4>
+                            <button className="btn btn-sm btn-outline-secondary" type="button" onClick={handleLimpiarFiltros}>
+                                Limpiar
+                            </button>
+                        </div>
+
+                        {/* Mostrar término de búsqueda activo */}
+                        {terminoBusqueda && (
+                            <div className="alert alert-info py-2 px-3 mb-3" role="alert">
+                                <small>
+                                    <i className="bi bi-search me-1"></i>
+                                    Buscando: <strong>{terminoBusqueda}</strong>
+                                </small>
+                                <button 
+                                    type="button" 
+                                    className="btn-close btn-close-white btn-sm float-end" 
+                                    style={{ fontSize: '0.7rem' }}
+                                    onClick={() => setTerminoBusqueda('')}
+                                    aria-label="Limpiar búsqueda"
+                                ></button>
+                            </div>
+                        )}
+
                         {/* Filtro de Precio */}
                         <div className="mb-4">
                             <h5 className="mb-2">Precio Máximo</h5>
@@ -175,7 +222,7 @@ const ProductShop: React.FC = () => {
                                 className="form-range"
                                 min="0"
                                 max={precioMaximoGlobal}
-                                step="1000"
+                                step="10"
                                 id="precioRange"
                                 value={precioMaximoSlider}
                                 onChange={handleSliderChange}
@@ -221,10 +268,6 @@ const ProductShop: React.FC = () => {
                                 </div>
                             ))}
                         </div>
-
-                        <div className="d-grid gap-2">
-                            <button className="btn btn-outline-secondary" type="button" onClick={handleLimpiarFiltros}>Limpiar filtros</button>
-                        </div>
                     </aside>
                 </div>
 
@@ -232,7 +275,8 @@ const ProductShop: React.FC = () => {
                 <div className="col-12 col-md-9 col-lg-9">
                     <div className="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
                         <h5 className="m-0 text-white" id="contador-resultados">
-                            {productos.length} resultados
+                            {productos.length} resultado{productos.length !== 1 ? 's' : ''}
+                            {terminoBusqueda && <span className="text-muted ms-2">para "{terminoBusqueda}"</span>}
                         </h5>
                         {/* Dropdown de Ordenamiento */}
                         <div className="dropdown" style={{ minWidth: '260px', maxWidth: '320px' }}>
@@ -276,7 +320,17 @@ const ProductShop: React.FC = () => {
                                 </div>
                             ))
                         ) : (
-                            <p className="text-center text-muted mt-5">No se encontraron productos con los filtros seleccionados.</p>
+                            <div className="text-center text-light py-5">
+                                <i className="bi bi-inbox fs-1 d-block mb-3"></i>
+                                <p>
+                                    {terminoBusqueda 
+                                        ? `No se encontraron productos para "${terminoBusqueda}".` 
+                                        : 'No se encontraron productos con los filtros seleccionados.'}
+                                </p>
+                                <button className="btn btn-outline-light" onClick={handleLimpiarFiltros}>
+                                    Limpiar filtros
+                                </button>
+                            </div>
                         )}
                     </div>
                 </div>

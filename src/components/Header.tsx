@@ -19,11 +19,11 @@ const formatearCategoria = (categoria: string): string => {
 };
 
 const Header: React.FC = () => {
-    // Obtiene el usuario actual desde localStorage (usando UsuarioSesion)
     const usuarioActualJSON = localStorage.getItem("usuarioActual");
     const usuarioActual: UsuarioSesion | null = usuarioActualJSON ? JSON.parse(usuarioActualJSON) : null;
     
     const navigate = useNavigate();
+    const [searchTerm, setSearchTerm] = React.useState('');
 
     // 2. LÓGICA PARA OBTENER CATEGORÍAS ÚNICAS (Solo se recalcula si productosDB cambia, que es poco probable)
     const categoriasUnicas: string[] = useMemo(() => {
@@ -42,6 +42,14 @@ const Header: React.FC = () => {
         localStorage.removeItem("usuarioActual");
         // Forzar recarga completa y navegar a /main
         window.location.href = '/main';
+    };
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (searchTerm.trim()) {
+            navigate(`/productos?search=${encodeURIComponent(searchTerm.trim())}`);
+            setSearchTerm(''); // limpiar el input después de buscar
+        }
     };
 
     return (
@@ -102,9 +110,17 @@ const Header: React.FC = () => {
                     </ul>
 
                     {/* Formulario de Búsqueda */}
-                    <form className="d-flex" onSubmit={(e) => { e.preventDefault(); navigate(`/main?productoSearch=${(document.getElementById('productoSearch') as HTMLInputElement).value}`) }}>
-                        <input className="form-control me-2" type="text" name="productoSearch" id="productoSearch" placeholder="Introduce tu búsqueda" />
-                        <button className="btn btn-primary" type="submit">Buscar</button>
+                    <form className="d-flex" onSubmit={handleSearch}>
+                        <input 
+                            className="form-control me-2" 
+                            type="text" 
+                            placeholder="Buscar productos..." 
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        <button className="btn btn-primary" type="submit">
+                            <i className="bi bi-search"></i>
+                        </button>
                     </form>
 
                     {/* Menú de Usuario (código sin cambios) */}

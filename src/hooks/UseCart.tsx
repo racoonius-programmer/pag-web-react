@@ -1,6 +1,3 @@
-// ✅ src/hooks/useCart.ts
-// Hook y contexto global para gestionar el carrito de compras
-
 import React, { useState, useEffect, useContext, createContext, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import type { Product } from '../types/Product';
@@ -8,7 +5,7 @@ import type { CartItem } from '../types/Cart';
 
 
 // ----------------------------------------------------------------------
-// 1️⃣ Tipo del contexto del carrito
+// Tipo del contexto del carrito
 // ----------------------------------------------------------------------
 interface CartContextType {
   cart: CartItem[];
@@ -19,12 +16,12 @@ interface CartContextType {
 }
 
 // ----------------------------------------------------------------------
-// 2️⃣ Creación del contexto
+// Creación del contexto
 // ----------------------------------------------------------------------
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 // ----------------------------------------------------------------------
-// 3️⃣ Hook interno con la lógica del carrito
+// Hook interno con la lógica del carrito
 // (NO se exporta directamente)
 // ----------------------------------------------------------------------
 const useCart = () => {
@@ -44,7 +41,7 @@ const useCart = () => {
     localStorage.setItem('carrito', JSON.stringify(cart));
   }, [cart]);
 
-  // ➕ Agregar producto al carrito
+  // Agregar producto al carrito
   const addToCart = (product: Product, quantity: number = 1) => {
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.codigo === product.codigo);
@@ -62,7 +59,7 @@ const useCart = () => {
     });
   };
 
-  // ➖ Remover producto (una o varias unidades)
+  // Remover producto (una o varias unidades)
   const removeFromCart = (codigo: string, quantityToRemove: number = 1) => {
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.codigo === codigo);
@@ -84,12 +81,12 @@ const useCart = () => {
     });
   };
 
-  // 🧹 Vaciar todo el carrito
+  // Vaciar todo el carrito
   const clearCart = () => {
     setCart([]);
   };
 
-  // 💰 Calcular el monto total
+  // Calcular el monto total
   const totalAmount = useMemo(() => {
     return cart.reduce((total, item) => total + item.precio * item.cantidad, 0);
   }, [cart]);
@@ -98,7 +95,7 @@ const useCart = () => {
 };
 
 // ----------------------------------------------------------------------
-// 4️⃣ Provider del contexto (se exporta)
+// Provider del contexto (se exporta)
 // ----------------------------------------------------------------------
 
 interface CartProviderProps {
@@ -120,7 +117,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({children}) => {
 
 
 // ----------------------------------------------------------------------
-// 5️⃣ Hook de consumo (el que usarás en tus componentes)
+// Hook de consumo (se usa en componentes)
 // ----------------------------------------------------------------------
 export const useCartContext = () => {
   const context = useContext(CartContext);

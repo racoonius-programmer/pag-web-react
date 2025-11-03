@@ -193,7 +193,7 @@ const ProductShop: React.FC = () => {
                         <div className="d-flex justify-content-between align-items-center mb-3">
                             <h4 className="m-0">Filtros</h4>
                             <button className="btn btn-sm btn-outline-secondary" type="button" onClick={handleLimpiarFiltros}>
-                                Limpiar
+                                Limpiar filtros
                             </button>
                         </div>
 

@@ -51,9 +51,9 @@ const Admin_Products: React.FC = () => {
         const matchesCategory = filterCategory === 'all' || product.categoria === filterCategory;
         
         let matchesPrice = true;
-        if (filterPriceRange === 'low') matchesPrice = product.precio <= 50000;
-        else if (filterPriceRange === 'medium') matchesPrice = product.precio > 50000 && product.precio <= 200000;
-        else if (filterPriceRange === 'high') matchesPrice = product.precio > 200000;
+        if (filterPriceRange === 'low') matchesPrice = product.precio < 50000;
+        else if (filterPriceRange === 'medium') matchesPrice = product.precio >= 50000 && product.precio < 200000;
+        else if (filterPriceRange === 'high') matchesPrice = product.precio >= 200000;
         
         return matchesSearch && matchesCategory && matchesPrice;
     });

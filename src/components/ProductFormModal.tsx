@@ -90,26 +90,34 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         }
     };
 
-    const validateForm = (): boolean => {
-        const newErrors: {[key: string]: string} = {};
+    const validarFormulario = () => {
+        const errores: Record<string, string> = {};
+        
+        if (!formData.nombre?.trim()) errores.nombre = 'El nombre es obligatorio';
+        if (!formData.precio || formData.precio <= 0) errores.precio = 'El precio debe ser mayor a 0';
+        // Imagen opcional, acepta URLs locales (img/...) y URLs completas (http...)
+        // Solo validar que no esté vacía si es obligatoria
+        if (!formData.imagen?.trim()) {
+            errores.imagen = 'La ruta de la imagen es obligatoria';
+        }
+        
+        setErrors(errores);
+        return Object.keys(errores).length === 0;
+    };
 
-        if (!formData.nombre.trim()) {
-            newErrors.nombre = 'El nombre es obligatorio';
+    // Función auxiliar para validar URL (opcional)
+    const isValidUrl = (url: string): boolean => {
+        try {
+            new URL(url);
+            return true;
+        } catch {
+            return false;
         }
-        if (formData.precio <= 0) {
-            newErrors.precio = 'El precio debe ser mayor a 0';
-        }
-        if (!formData.categoria) {
-            newErrors.categoria = 'La categoría es obligatoria';
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (validateForm()) {
+        if (validarFormulario()) {
             onSubmit(formData);
             onClose();
         }
@@ -161,7 +169,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                         value={formData.precio}
                                         onChange={handleInputChange}
                                         min="1"
-                                        step="1000"
+                                        step="any"
                                     />
                                     {errors.precio && <div className="invalid-feedback">{errors.precio}</div>}
                                 </div>
@@ -231,13 +239,14 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                 <div className="col-md-6">
                                     <label className="form-label">URL de la imagen</label>
                                     <input
-                                        type="url"
+                                        type="text"
                                         className="form-control"
                                         name="imagen"
                                         value={formData.imagen}
                                         onChange={handleInputChange}
                                         placeholder="https://ejemplo.com/imagen.jpg"
                                     />
+                                    {errors.imagen && <div className="invalid-feedback">{errors.imagen}</div>}
                                 </div>
 
                                 <div className="col-12">

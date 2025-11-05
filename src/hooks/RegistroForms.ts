@@ -36,10 +36,14 @@ const MIN_AGE = 18;
 const MAX_AGE = 100;
 
 // ----------------------------------------------------------------------
-// FUNCIONES AUXILIARES
+// FUNCIONES AUXILIARES (EXPORTADAS PARA PRUEBAS)
 // ----------------------------------------------------------------------
 
-const calculateAge = (today: Date, birthDateStr: string): number => {
+/**
+ * Calcula la edad basada en la fecha de nacimiento
+ * EXPORTADA para pruebas unitarias
+ */
+export const calculateAge = (today: Date, birthDateStr: string): number => {
     const birthDate = new Date(birthDateStr);
     let age = today.getFullYear() - birthDate.getFullYear();
     const month = today.getMonth() - birthDate.getMonth();
@@ -49,6 +53,126 @@ const calculateAge = (today: Date, birthDateStr: string): number => {
         age--;
     }
     return age;
+};
+
+/**
+ * Valida el username según las reglas de negocio
+ * EXPORTADA para pruebas unitarias
+ */
+export const validateUsername = (username: string): ValidationMessage | null => {
+    if (username.length === 0) {
+        return null; // No muestra mensaje si está vacío
+    }
+    
+    if (username.length >= 3) {
+        return {
+            message: "✔ Nombre de usuario válido",
+            className: 'text-success'
+        };
+    } else {
+        return {
+            message: "✖ Debe tener al menos 3 caracteres",
+            className: 'text-danger'
+        };
+    }
+};
+
+/**
+ * Valida el correo según los dominios permitidos
+ * EXPORTADA para pruebas unitarias
+ */
+export const validateCorreo = (correo: string): ValidationMessage | null => {
+    if (correo.length === 0) {
+        return null;
+    }
+    
+    const domain = correo.includes('@') ? `@${correo.split('@')[1]}` : '';
+    const esCorreoValido = DOMINIOS_PERMITIDOS.includes(domain.toLowerCase());
+    
+    return esCorreoValido
+        ? { message: "✔ Correo válido", className: 'text-success' }
+        : { message: `✖ Use dominios: ${DOMINIOS_PERMITIDOS.join(', ')}`, className: 'text-danger' };
+};
+
+/**
+ * Valida la contraseña según la longitud mínima
+ * EXPORTADA para pruebas unitarias
+ */
+export const validateContrasena = (contrasena: string): ValidationMessage | null => {
+    if (contrasena.length === 0) {
+        return null;
+    }
+    
+    return contrasena.length >= MIN_PASSWORD_LENGTH
+        ? { message: "✔ Longitud válida", className: 'text-success' }
+        : { message: `✖ Mínimo ${MIN_PASSWORD_LENGTH} caracteres`, className: 'text-danger' };
+};
+
+/**
+ * Valida que las contraseñas coincidan
+ * EXPORTADA para pruebas unitarias
+ */
+export const validateConfirmarContrasena = (contrasena: string, confirmarContrasena: string): ValidationMessage | null => {
+    if (confirmarContrasena.length === 0 && contrasena.length === 0) {
+        return null;
+    }
+    
+    return contrasena === confirmarContrasena
+        ? { message: "✔ Las contraseñas coinciden", className: 'text-success' }
+        : { message: "✖ Las contraseñas no coinciden", className: 'text-danger' };
+};
+
+/**
+ * Valida la fecha de nacimiento y edad
+ * EXPORTADA para pruebas unitarias
+ */
+export const validateFechaNacimiento = (fechaNacimiento: string, today: Date = new Date()): ValidationMessage | null => {
+    if (!fechaNacimiento) {
+        return null;
+    }
+    
+    const fechaSeleccionada = new Date(fechaNacimiento);
+    const edad = calculateAge(today, fechaNacimiento);
+
+    if (fechaSeleccionada > today) {
+        return { message: "✖ No puede ser una fecha futura.", className: 'text-danger' };
+    } else if (edad < MIN_AGE) {
+        return { message: `✖ Debe ser mayor de ${MIN_AGE} años.`, className: 'text-danger' };
+    } else if (edad > MAX_AGE) {
+        return { message: `✖ No puede tener más de ${MAX_AGE} años.`, className: 'text-danger' };
+    } else {
+        return { message: "✔ Fecha válida.", className: 'text-success' };
+    }
+};
+
+/**
+ * Valida el teléfono (9 dígitos)
+ * EXPORTADA para pruebas unitarias
+ */
+export const validateTelefono = (telefono: string): ValidationMessage | null => {
+    const telefonoSinFormato = telefono.replace(/\D/g, "");
+    
+    if (telefonoSinFormato.length === 0) {
+        return null;
+    }
+    
+    return telefonoSinFormato.length === 9
+        ? { message: "✔ Número válido (9 dígitos)", className: 'text-success' }
+        : { message: "✖ Número incompleto (9 dígitos)", className: 'text-danger' };
+};
+
+/**
+ * Valida la dirección (mínimo 5 caracteres)
+ * EXPORTADA para pruebas unitarias
+ */
+export const validateDireccion = (direccion: string): ValidationMessage | null => {
+    if (direccion.length === 0) {
+        return null;
+    }
+    
+    return direccion.length >= 5
+        ? { message: "✔ Dirección válida", className: 'text-success' }
+        : { message: "✖ Mínimo 5 caracteres", className: 'text-danger' };
 };
 
 // ----------------------------------------------------------------------
@@ -124,69 +248,34 @@ export function useRegistroForm(
         const { username, correo, fechaNacimiento, contrasena, confirmarContrasena, telefono, direccion } = formData;
         const newMessages: ValidationState = {};
         
-        // NOTA: Usamos una sola clave por campo para el feedback visual simplificado, 
-        // a diferencia de tu versión original que usaba "contrasenaLargo" y "contrasenaCoincidencia".
-
+        // AHORA USAMOS LAS FUNCIONES EXPORTADAS
         // 1. Username
-        if (username.length > 0) {
-            newMessages.username = username.length >= 3 
-                ? { message: "✔ Nombre de usuario válido", className: 'text-success' }
-                : { message: "✖ Debe tener al menos 3 caracteres", className: 'text-danger' };
-        }
+        const usernameValidation = validateUsername(username);
+        if (usernameValidation) newMessages.username = usernameValidation;
 
         // 2. Correo
-        if (correo.length > 0) {
-            const domain = correo.includes('@') ? `@${correo.split('@')[1]}` : '';
-            const esCorreoValido = DOMINIOS_PERMITIDOS.includes(domain.toLowerCase());
-            newMessages.correo = esCorreoValido
-                ? { message: "✔ Correo válido", className: 'text-success' }
-                : { message: `✖ Use dominios: ${DOMINIOS_PERMITIDOS.join(', ')}`, className: 'text-danger' };
-        }
+        const correoValidation = validateCorreo(correo);
+        if (correoValidation) newMessages.correo = correoValidation;
 
         // 3. Contraseña
-        if (contrasena.length > 0) {
-            newMessages.contrasena = contrasena.length >= MIN_PASSWORD_LENGTH
-                ? { message: "✔ Longitud válida", className: 'text-success' }
-                : { message: `✖ Mínimo ${MIN_PASSWORD_LENGTH} caracteres`, className: 'text-danger' };
-        }
+        const contrasenaValidation = validateContrasena(contrasena);
+        if (contrasenaValidation) newMessages.contrasena = contrasenaValidation;
 
         // 4. Confirmar Contraseña
-        if (confirmarContrasena.length > 0 || contrasena.length > 0) {
-            newMessages.confirmarContrasena = contrasena === confirmarContrasena
-                ? { message: "✔ Las contraseñas coinciden", className: 'text-success' }
-                : { message: "✖ Las contraseñas no coinciden", className: 'text-danger' };
-        }
+        const confirmarContrasenaValidation = validateConfirmarContrasena(contrasena, confirmarContrasena);
+        if (confirmarContrasenaValidation) newMessages.confirmarContrasena = confirmarContrasenaValidation;
 
-        // 5. Fecha de Nacimiento / Edad
-        if (fechaNacimiento) {
-            const fechaSeleccionada = new Date(fechaNacimiento);
-            const edad = calculateAge(today, fechaNacimiento);
-
-            if (fechaSeleccionada > today) {
-                newMessages.fechaNacimiento = { message: "✖ No puede ser una fecha futura.", className: 'text-danger' };
-            } else if (edad < MIN_AGE) {
-                newMessages.fechaNacimiento = { message: `✖ Debe ser mayor de ${MIN_AGE} años.`, className: 'text-danger' };
-            } else if (edad > MAX_AGE) {
-                newMessages.fechaNacimiento = { message: `✖ No puede tener más de ${MAX_AGE} años.`, className: 'text-danger' };
-            } else {
-                newMessages.fechaNacimiento = { message: "✔ Fecha válida.", className: 'text-success' };
-            }
-        }
+        // 5. Fecha de Nacimiento
+        const fechaNacimientoValidation = validateFechaNacimiento(fechaNacimiento, today);
+        if (fechaNacimientoValidation) newMessages.fechaNacimiento = fechaNacimientoValidation;
 
         // 6. Teléfono
-        const telefonoSinFormato = telefono.replace(/\D/g, "");
-        if (telefonoSinFormato.length > 0) {
-            newMessages.telefono = telefonoSinFormato.length === 9
-                ? { message: "✔ Número válido (9 dígitos)", className: 'text-success' }
-                : { message: "✖ Número incompleto (9 dígitos)", className: 'text-danger' };
-        }
+        const telefonoValidation = validateTelefono(telefono);
+        if (telefonoValidation) newMessages.telefono = telefonoValidation;
 
         // 7. Dirección
-        if (direccion.length > 0) {
-            newMessages.direccion = direccion.length >= 5
-                ? { message: "✔ Dirección válida", className: 'text-success' }
-                : { message: "✖ Mínimo 5 caracteres", className: 'text-danger' };
-        }
+        const direccionValidation = validateDireccion(direccion);
+        if (direccionValidation) newMessages.direccion = direccionValidation;
 
         setValidationMessages(newMessages);
 

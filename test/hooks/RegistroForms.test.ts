@@ -11,7 +11,6 @@ import type { ChangeEvent, FormEvent } from 'react';
 // MOCKS Y AYUDANTES
 // ----------------------------------------------------------------------
 
-// Mock de un evento de cambio
 const createChangeEvent = (id: string, value: string): ChangeEvent<HTMLInputElement | HTMLSelectElement> => ({
     target: { id, value } as any,
 } as ChangeEvent<HTMLInputElement | HTMLSelectElement>);
@@ -21,11 +20,10 @@ const createSubmitEvent = (): FormEvent<HTMLFormElement> => ({
     preventDefault: vi.fn(),
 } as any);
 
-// Datos válidos de ejemplo
 const validFormData = {
     username: 'testuser',
     correo: 'test@duoc.cl',
-    fechaNacimiento: '2000-01-01', // Asumimos que la prueba corre antes de 2018
+    fechaNacimiento: '2000-01-01',
     contrasena: 'password123',
     confirmarContrasena: 'password123',
     telefono: '9 8765 4321',

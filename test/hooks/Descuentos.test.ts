@@ -5,11 +5,6 @@ import { describe, test, expect, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { usarDescuento } from "../../src/hooks/Descuentos"; // Asegúrate que la ruta sea correcta
 
-// ----------------------------------------------------------------------
-// MOCKS Y AYUDANTES
-// ----------------------------------------------------------------------
-
-// Tipos simulados basados en tu hook
 interface Product {
     id: number;
     nombre: string;
@@ -21,7 +16,6 @@ interface UsuarioSesion {
     id: number;
     username: string;
     rol: 'user' | 'admin';
-    // ... otras propiedades que pueda tener
 }
 // Productos de prueba
 const productoBase: Product = { id: 1, nombre: 'Producto 1000', precio: 1000, codigo: 'PROD-1000' };
@@ -40,7 +34,7 @@ const mockLocalStorageUsuario = (usuario: UsuarioSesion | null) => {
 };
 
 // ----------------------------------------------------------------------
-// CONFIGURACIÓN DE PRUEBAS
+// PRUEBAS
 // ----------------------------------------------------------------------
 
 describe('Hook: usarDescuento', () => {
@@ -55,7 +49,7 @@ describe('Hook: usarDescuento', () => {
     });
 
     // ----------------------------------------------------------------------
-    // PRUEBAS
+    // TESTS
     // ----------------------------------------------------------------------
 
     test('no debe aplicar descuento si el usuario no es Duoc', () => {

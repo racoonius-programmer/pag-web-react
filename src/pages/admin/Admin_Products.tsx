@@ -6,43 +6,71 @@ import ProductFormModal from '../../components/ProductFormModal';
 import Modal from '../../components/Modal';
 import { useModal } from '../../hooks/Modal';
 
+/*
+  Admin_Products
+  --------------
+  Vista del panel de administración para gestionar productos.
+
+  Comportamiento principal:
+  - Usa `useProducts()` para obtener y modificar la lista de productos (CRUD).
+  - Permite buscar, filtrar por categoría y rango de precio.
+  - Muestra una lista con acciones: ver detalles, editar, clonar, eliminar.
+  - Usa `ProductFormModal` para agregar/editar productos y `Modal`/`useModal` para
+    mensajes informativos (éxito/error).
+
+  Nota: la lógica de persistencia (localStorage) está dentro de `useProducts()`.
+*/
 const Admin_Products: React.FC = () => {
+    // Hook de productos (devuelve productos y funciones CRUD)
     const { productos, addProduct, updateProduct, deleteProduct, cloneProduct } = useProducts();
+
+    // Estado UI: producto seleccionado para ver detalles
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+    // Estado de filtros / búsqueda
     const [searchTerm, setSearchTerm] = useState('');
     const [filterCategory, setFilterCategory] = useState<string>('all');
     const [filterPriceRange, setFilterPriceRange] = useState<'all' | 'low' | 'medium' | 'high'>('all');
     
-    // Estados para el modal de formulario
+    // Estados para el modal del formulario (agregar/editar)
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
     const [productToEdit, setProductToEdit] = useState<Product | null>(null);
 
-    // Estados para modales de confirmación y mensajes
+    // Modales de mensaje / confirmación
+    // useModal proviene de src/hooks/Modal.ts y gestiona un modal global de mensajes
     const { modalState, showModal, handleClose } = useModal();
+
+    // confirmModal: estado local para un modal de confirmación implementado manualmente
     const [confirmModal, setConfirmModal] = useState<{
         show: boolean;
         title: string;
         message: string;
         onConfirm: () => void;
-    }>({
-        show: false,
-        title: '',
-        message: '',
-        onConfirm: () => {}
-    });
+    }>(
+        // Valor inicial: modal oculto
+        {
+            show: false,
+            title: '',
+            message: '',
+            onConfirm: () => {}
+        }
+    );
 
+    // formatea categorías (reemplaza '_' y capitaliza palabras)
     const formatCategoria = (categoria: string): string => {
         return categoria.replace(/_/g, ' ').split(' ').map(word => 
             word.charAt(0).toUpperCase() + word.slice(1)
         ).join(' ');
     };
 
+    // Devuelve categorías únicas a partir del array de productos
     const getUniqueCategories = () => {
         const categories = new Set(productos.map(p => p.categoria).filter(Boolean));
         return Array.from(categories);
     };
 
+    // Filtrado combinado: búsqueda + categoría + rango de precios
     const filteredProducts = productos.filter(product => {
         const matchesSearch = product.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
                              product.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -58,12 +86,14 @@ const Admin_Products: React.FC = () => {
         return matchesSearch && matchesCategory && matchesPrice;
     });
 
+    // Devuelve la clase de color para la badge de precio según el rango
     const getPriceRangeColor = (precio: number) => {
         if (precio <= 50000) return 'success';
         if (precio <= 200000) return 'warning';
         return 'danger';
     };
 
+    // Estadísticas rápidas de productos
     const getProductStats = () => {
         const stats = {
             total: productos.length,
@@ -75,18 +105,21 @@ const Admin_Products: React.FC = () => {
         return stats;
     };
 
+    // Abrir modal en modo 'add'
     const handleAddProduct = () => {
         setModalMode('add');
         setProductToEdit(null);
         setIsModalOpen(true);
     };
 
+    // Abrir modal en modo 'edit' y precargar el producto
     const handleEditProduct = (product: Product) => {
         setModalMode('edit');
         setProductToEdit(product);
         setIsModalOpen(true);
     };
 
+    // Clonar producto: usa cloneProduct del hook y muestra un modal con el resultado
     const handleCloneProduct = (codigo: string) => {
         const cloned = cloneProduct(codigo);
         if (cloned) {
@@ -99,6 +132,7 @@ const Admin_Products: React.FC = () => {
         }
     };
 
+    // Eliminar producto: abre confirmación y en onConfirm borra y muestra modal de éxito
     const handleDeleteProduct = (codigo: string, nombre: string) => {
         setConfirmModal({
             show: true,
@@ -115,6 +149,7 @@ const Admin_Products: React.FC = () => {
         });
     };
 
+    // Maneja el submit del ProductFormModal (agregar o editar según modalMode)
     const handleModalSubmit = (productData: Omit<Product, 'codigo'>) => {
         if (modalMode === 'add') {
             const newProduct = addProduct(productData);
@@ -493,3 +528,32 @@ const Admin_Products: React.FC = () => {
 };
 
 export default Admin_Products;
+
+/*
+    - src/App.tsx
+        * Importa `Admin_Products` y lo monta en una ruta del router:  
+            `<Route path="products" element={<Admin_Products />} />` dentro de la ruta `/admin`.
+        * Por qué: es la entrada principal para acceder a la vista de gestión de productos desde
+            la navegación de la aplicación.
+
+    - src/pages/admin/Admin_Layout.tsx
+        * No lo importa directamente, pero el sidebar incluye un botón que navega a `/admin/products`.
+        * Por qué: el layout proporciona la navegación (sidebar) que permite al usuario ir
+            a la página `Admin_Products` dentro del área de administración.
+
+    - src/components/ProductFormModal.tsx
+        * `ProductFormModal` se importa y se usa DENTRO de este archivo (`Admin_Products`) para
+            mostrar el formulario de agregar/editar productos.
+        * Por qué: es el componente UI que administra el formulario y la validación al crear/editar.
+
+    - src/hooks/UseProducts.tsx
+        * `Admin_Products` consume el hook `useProducts()` (de este archivo) para obtener la lista
+            de productos y las funciones CRUD (addProduct, updateProduct, deleteProduct, cloneProduct).
+        * Por qué: la lógica de persistencia y manipulación de productos está encapsulada en el hook
+            y se reutiliza desde aquí y desde otras vistas administrativas.
+
+    - src/hooks/Modal.ts
+        * `Admin_Products` usa `useModal()` y `Modal` (componente) para mostrar mensajes/confirmaciones.
+        * Por qué: `useModal` centraliza la gestión de mensajes modales globales y permite mostrar
+            feedback (éxito/errores) al usuario tras acciones CRUD.
+*/

@@ -2,23 +2,43 @@
 import React, { useState, useEffect } from 'react';
 import type { Usuario } from '../../types/User';
 
+/*
+  Funcionalidad principal:
+  - Carga la lista de usuarios desde localStorage (clave 'usuarios').
+  - Permite buscar y filtrar por rol y por si tienen descuento DUOC.
+  - Permite acciones de administración: ver detalles, asignar/quitar rol admin,
+    activar/desactivar descuento DUOC y eliminar usuarios.
+
+  Notas:
+    Las actualizaciones se guardan en localStorage para persistencia entre sesiones
+    durante el desarrollo.
+*/
 const Admin_Users: React.FC = () => {
+    // Lista completa de usuarios (estado local)
     const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+
+    // Usuario actualmente seleccionado en el panel de detalles
     const [selectedUser, setSelectedUser] = useState<Usuario | null>(null);
+
+    // Estados para búsqueda y filtros
     const [searchTerm, setSearchTerm] = useState('');
     const [filterRole, setFilterRole] = useState<'all' | 'admin' | 'usuario'>('all');
     const [filterDuoc, setFilterDuoc] = useState<'all' | 'si' | 'no'>('all');
 
+    // Cargar usuarios al montar el componente
     useEffect(() => {
         loadUsers();
     }, []);
 
+    // Lee 'usuarios' desde localStorage y actualiza el estado
     const loadUsers = () => {
         const usuariosJSON = localStorage.getItem("usuarios");
         const usuariosList: Usuario[] = usuariosJSON ? JSON.parse(usuariosJSON) : [];
         setUsuarios(usuariosList);
     };
 
+    // Elimina un usuario (con confirmación browser)
+    // Actualiza localStorage y limpia la selección si era el borrado
     const deleteUser = (userId: number) => {
         if (window.confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
             const updatedUsers = usuarios.filter(u => u.id !== userId);
@@ -28,6 +48,8 @@ const Admin_Users: React.FC = () => {
         }
     };
 
+    // Alterna el rol entre 'admin' y 'usuario'
+    // Actualiza localStorage y el usuario seleccionado si aplica
     const toggleUserRole = (userId: number) => {
         const updatedUsers = usuarios.map(user => {
             if (user.id === userId) {
@@ -47,6 +69,8 @@ const Admin_Users: React.FC = () => {
         }
     };
 
+    // Alterna el flag `descuentoDuoc` para un usuario
+    // Igual que el anterior, actualiza estado y persistencia
     const toggleDuocDiscount = (userId: number) => {
         const updatedUsers = usuarios.map(user => {
             if (user.id === userId) {
@@ -66,7 +90,7 @@ const Admin_Users: React.FC = () => {
         }
     };
 
-    // Filtrar usuarios
+    // Filtrado combinado: búsqueda por username/email + rol + descuento DUOC
     const filteredUsers = usuarios.filter(user => {
         const matchesSearch = user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
                              user.correo.toLowerCase().includes(searchTerm.toLowerCase());
@@ -78,6 +102,11 @@ const Admin_Users: React.FC = () => {
         return matchesSearch && matchesRole && matchesDuoc;
     });
 
+    // -----------------
+    // JSX: la estructura visual
+    // - columna izquierda: lista y acciones
+    // - columna derecha: detalles del usuario seleccionado
+    // -----------------
     return (
         <div className="p-4">
             <div className="row g-4">
@@ -309,3 +338,17 @@ const Admin_Users: React.FC = () => {
 };
 
 export default Admin_Users;
+
+/*
+  Dónde se importa / usa este componente `Admin_Users`:
+  - src/App.tsx
+    * Importa `Admin_Users` y lo monta en la ruta del área administrativa:  
+      `<Route path="users" element={<Admin_Users />} />` dentro de la ruta `/admin`.
+    * Por qué: es la entrada principal para la gestión de usuarios desde el panel admin.
+
+  - src/pages/admin/Admin_Layout.tsx
+    * No lo importa directamente, pero el layout (sidebar) incluye la navegación que
+      permite acceder a `/admin/users`.
+    * Por qué: el layout centraliza la navegación del admin y permite que `Admin_Users`
+      se muestre dentro del mismo contenedor (Outlet) compartido.
+*/

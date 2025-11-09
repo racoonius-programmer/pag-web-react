@@ -20,7 +20,7 @@ const MainScreen: React.FC = () => {
             {/* Sección "Lo más vendido" (Aún pendiente de modularizar) */}
             <ProductosDestacados/>
 
-            {/* 3. Componente modularizado */}
+            {/*Componente modularizado */}
             <BannerWhatsApp />
             
         </div>

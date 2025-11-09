@@ -63,7 +63,7 @@ export function useRegistroForm(
 ) {
     const today = useMemo(() => new Date(), []);
 
-    // 🚨 1. ESTADO ADICIONAL: Controla si el usuario ha interactuado
+    //  1. ESTADO ADICIONAL: Controla si el usuario ha interactuado
     const [isFormTouched, setIsFormTouched] = useState(false); 
 
     const [formData, setFormData] = useState<RegistroFormData>({
@@ -112,7 +112,7 @@ export function useRegistroForm(
 
         setFormData(prev => ({ ...prev, [id as keyof RegistroFormData]: newValue }));
         
-        // 🚨 2. Marcar como tocado
+        // 2. Marcar como tocado
         if (!isFormTouched) {
             setIsFormTouched(true);
         }
@@ -230,8 +230,7 @@ export function useRegistroForm(
         
         // Si hay errores, forzamos la actualización de validationMessages para que el usuario los vea.
         if (errorMessages.length > 0) {
-             // Si quieres un mensaje detallado por campo, deberías construir un objeto de errores aquí
-             // por simplicidad en el submit, usamos el listado de errorMessages.
+             // Aquí por simplicidad en el submit, usamos el listado de errorMessages.
             return `Por favor, corrija los siguientes errores:\n${errorMessages.join('\n')}`;
         }
 
@@ -240,10 +239,9 @@ export function useRegistroForm(
 
     // --- Función de Submit (Registro) ---
     const handleRegistroSubmit = useCallback((e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        console.log("Submit ejecutado"); // <-- AGREGAR ESTO
+    e.preventDefault();
 
-        // 🚨 3. Forzar el estado 'touched' al intentar submit para mostrar todos los errores
+        // 3. Forzar el estado 'touched' al intentar submit para mostrar todos los errores
         setIsFormTouched(true);
 
         const validationError = validateForm(formData);
@@ -296,9 +294,7 @@ export function useRegistroForm(
         usuariosGuardados.push(nuevoUsuario);
         localStorage.setItem("usuarios", JSON.stringify(usuariosGuardados));
         
-        let redirectPath = "/main"; // <-- Cambia a la ruta de React
-        let modalTitle = "Registro Exitoso";
-        let modalMessage = "¡Registro exitoso!" + (descuentoDuoc ? " Tienes 20% de descuento de por vida." : "");
+    let redirectPath = "/main"; // <-- Cambia a la ruta de React
 
         if (usuarioLogueado && usuarioLogueado.rol === 'admin') {
             redirectPath = "/admin";
@@ -328,9 +324,17 @@ export function useRegistroForm(
     return {
         formData,
         validationMessages,
-        isFormTouched, // 🚨 Propiedad retornada
+        isFormTouched, // 
         handleChange,
-        handleSubmit: handleRegistroSubmit, // 🚨 Renombrado a handleSubmit para el uso en el componente
+        handleSubmit: handleRegistroSubmit, // 
         maxDate,
     };
  }
+
+/*
+    Archivos que importan / usan este hook `useRegistroForm`:
+    - src/pages/User_Register.tsx
+        * Aquí se importa con: `import { useRegistroForm, type RegistroFormData } from '../hooks/RegistroForms';`
+        * Se usa para gestionar todo el formulario de registro: estado, validaciones y submit.
+*/
+

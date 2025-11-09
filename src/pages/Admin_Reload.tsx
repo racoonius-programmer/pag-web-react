@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+
 const Admin_Reload: React.FC = () => {
     const navigate = useNavigate();
 
@@ -22,3 +23,9 @@ const Admin_Reload: React.FC = () => {
 };
 
 export default Admin_Reload;
+
+/*
+  Archivos que importan / usan `Admin_Reload` (y por qué):
+  - `src/App.tsx`: importa `Admin_Reload` y lo monta en la ruta `/admin_main`.
+    Propósito: ofrecer una URL intermedia que inmediatamente redirige a `/admin`.
+*/

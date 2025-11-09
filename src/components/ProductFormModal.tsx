@@ -1,7 +1,21 @@
 // src/components/ProductFormModal.tsx
+// Componente: ProductFormModal
+// - Formulario en modal usado para agregar o editar productos desde el panel admin.
+// - Diseño: modal Bootstrap controlado por props (`isOpen`, `onClose`).
+// - Este archivo contiene: imports, tipos de props, estado local del formulario,
+//   validaciones simples, handlers y el JSX del modal.
+
+
+
 import React, { useState, useEffect } from 'react';
 import type { Product } from '../types/Product';
 
+// Props que recibe el modal de producto
+// - isOpen: controla si el modal se muestra
+// - onClose: callback que cierra el modal
+// - onSubmit: callback que recibe los datos del producto (sin `codigo`) cuando se envía el formulario
+// - product: objeto Product (opcional). Si está presente y mode === 'edit', se carga en el formulario
+// - mode: 'add' | 'edit' para distinguir comportamiento y etiquetas
 interface ProductFormModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -17,6 +31,8 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     product,
     mode
 }) => {
+    // Estado local del formulario (campo por campo). Es un objeto controlado.
+    // Se inicializa vacío para el modo 'add' y se rellenará desde `product` en modo 'edit'.
     const [formData, setFormData] = useState<Omit<Product, 'codigo'>>({
         nombre: '',
         precio: 0,
@@ -30,9 +46,10 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         enlace: ''
     });
 
+    // Estado para mensajes de error por campo. Llave = nombre del campo, valor = mensaje.
     const [errors, setErrors] = useState<{[key: string]: string}>({});
 
-    // Categorías disponibles
+    // Categorías disponibles (se usan en el select de categoría)
     const categorias = [
         'figuras',
         'juegos_de_mesa',
@@ -45,6 +62,10 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         'poleras_personalizadas'
     ];
 
+    // Effect: sincroniza el estado del formulario cuando cambian `mode`, `product` o `isOpen`.
+    // - En 'edit' copia los valores del `product` al formulario.
+    // - En 'add' resetea los campos a valores por defecto.
+    // También limpia cualquier mensaje de error al abrir/cerrar o cambiar producto.
     useEffect(() => {
         if (mode === 'edit' && product) {
             setFormData({
@@ -77,6 +98,9 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         setErrors({});
     }, [mode, product, isOpen]);
 
+    // Handler genérico para inputs, textarea y select.
+    // Actualiza `formData` por el `name` del elemento y convierte `precio` a número.
+    // También limpia el error del campo si existía.
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -90,13 +114,15 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         }
     };
 
+    // Validación simple del formulario antes de enviar.
+    // Rellena `errors` con mensajes por campo y devuelve true si todo es válido.
     const validarFormulario = () => {
         const errores: Record<string, string> = {};
         
         if (!formData.nombre?.trim()) errores.nombre = 'El nombre es obligatorio';
         if (!formData.precio || formData.precio <= 0) errores.precio = 'El precio debe ser mayor a 0';
         // Imagen opcional, acepta URLs locales (img/...) y URLs completas (http...)
-        // Solo validar que no esté vacía si es obligatoria
+        // En este formulario se exige que la ruta no esté vacía
         if (!formData.imagen?.trim()) {
             errores.imagen = 'La ruta de la imagen es obligatoria';
         }
@@ -105,7 +131,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         return Object.keys(errores).length === 0;
     };
 
-    // Función auxiliar para validar URL (opcional)
+    // Función auxiliar para validar URL
     const isValidUrl = (url: string): boolean => {
         try {
             new URL(url);
@@ -114,6 +140,9 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
             return false;
         }
     };
+
+    // Evitar warning de TS por función sin usar (se mantiene para validaciones futuras)
+    void isValidUrl;
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -302,3 +331,14 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
 };
 
 export default ProductFormModal;
+
+/*
+    Archivos que llaman a este componente:
+    - src/pages/admin/Admin_Products.tsx
+        Aquí se importa y usa <ProductFormModal /> para crear/editar productos desde el panel de admin.
+
+    Resumen rápido de uso:
+    - Abrir el modal pasando `isOpen={true}` y `mode` ('add'|'edit').
+    - En `onSubmit` recibirás un objeto con los campos del producto (sin `codigo`) y deberías
+        persistirlo en tu fuente de datos (localStorage, servidor, etc.).
+*/

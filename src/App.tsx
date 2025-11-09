@@ -34,7 +34,7 @@ const App: React.FC = () => {
         className="d-flex flex-column min-vh-100"
         style={{ backgroundColor: "black" }}
       >
-        {/* ✅ Header y Footer no deben depender de datos de usuario aún */}
+        {/*Header y Footer no deben depender de datos de usuario*/}
         <Header />
 
         <main className="flex-grow-1">
@@ -93,3 +93,38 @@ const App: React.FC = () => {
 };
 
 export default App;
+
+/*
+  Descripción y funcionamiento:
+
+  - Propósito: `App.tsx` es el componente raíz que configura el enrutamiento
+    (React Router) de la aplicación, envuelve la UI con el layout básico
+    (Header y Footer) y registra todas las rutas principales y secundarias.
+
+  - Comportamiento principal:
+    1. Importa y muestra `Header` en la parte superior y `Footer` en la parte
+       inferior. Estas capas son persistentes entre rutas.
+
+    2. Dentro del `<main>` declara un conjunto de `<Route>` usando `<Routes>`.
+       Cada ruta mapea una URL a un componente de página (p. ej. `/login` -> `User_Login`).
+
+    3. Define rutas anidadas para la sección de administración (`/admin`) usando
+       `Admin_Layout` como layout padre y rutas hijas para `Admin_Dashboard`,
+       `Admin_Users` y `Admin_Products`.
+
+    4. Tiene una ruta comodín (`path="*"`) que muestra una página 404 simple
+       con un enlace al inicio cuando la URL no coincide con ninguna ruta.
+
+    5. Importa los estilos y scripts de Bootstrap para tener los componentes
+       y utilidades de UI disponibles (CSS y bundle JS).
+
+  - Puntos importantes a entender:
+    - `App` no maneja estado global de negocio (usuarios, carrito, etc.). Ese
+      estado se provee desde otros hooks/Providers (por ejemplo `CartProvider`
+      en `main.tsx`). Aquí solo se define la navegación y layout.
+    - Las páginas importadas (Inicio, Productos, Pago, etc.) contienen la
+      lógica específica de cada sección; `App` las referencia para enlazarlas
+      a URLs concretas.
+
+  Nota: `App.tsx` actúa como mapa de rutas de la aplicación.
+*/

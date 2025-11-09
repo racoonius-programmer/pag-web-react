@@ -1,3 +1,12 @@
+/**
+ * SobreLevelUp.tsx
+ * ----------------
+ * Página estática "Quiénes somos" para Level-Up Gamer.
+ *
+ * Propósito:
+ * - Mostrar información institucional: logo, misión y visión.
+ * - Diseñada como página estática, sin estado reactivo ni efectos secundarios.
+ */
 import React from 'react';
 
 // NOTA: Asumimos que las fuentes (Roboto, Orbitron) y el CSS global
@@ -83,3 +92,25 @@ const SobreLevelUp: React.FC = () => {
 };
 
 export default SobreLevelUp;
+
+/*
+    Archivos que importan/usan este componente y por qué:
+
+    - src/App.tsx
+        -> Importa `SobreLevelUp` y lo expone en la ruta `/sobreLEVEL-UP`.
+             Es el punto central de enrutamiento que permite navegar a esta página.
+
+    - src/components/Header.tsx
+        -> Contiene un <Link to="/sobreLEVEL-UP"> en la navegación principal
+             que permite a los usuarios acceder a la página "¿Quiénes somos?".
+
+    - src/components/Footer.tsx
+        -> Contiene un enlace en el pie de página a `/sobreLEVEL-UP` para acceso
+             rápido desde el footer.
+
+    Resumen del porqué:
+    - `SobreLevelUp` es una página estática informativa; se importa principalmente
+        desde el enrutador (`App.tsx`) y se enlaza desde elementos de navegación
+        (Header y Footer) para que los usuarios puedan llegar a la sección "Quiénes
+        somos" desde la UI.
+*/

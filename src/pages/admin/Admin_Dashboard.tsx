@@ -3,22 +3,38 @@ import React, { useState, useEffect } from 'react';
 import type { Usuario } from '../../types/User';
 import { useProducts } from '../../hooks/UseProducts';
 
+/*
+  Admin_Dashboard
+  ----------------
+  Página del panel de administración que resume información del sistema:
+  - Lee usuarios desde `localStorage` y utiliza `useProducts()` para obtener productos.
+  - Muestra estadísticas: total usuarios, total productos, usuarios DUOC, admins,
+    productos por categoría y métricas rápidas (porcentaje DUOC, precio promedio, etc.).
+*/
 const Admin_Dashboard: React.FC = () => {
+    // Estado local para la lista de usuarios
     const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+
+    // Consumimos el hook de productos para obtener la lista actual
     const { productos } = useProducts(); // Usar el hook personalizado
 
+    // Cargar usuarios desde localStorage al montar el componente
     useEffect(() => {
-        // Cargar usuarios desde localStorage
         const usuariosJSON = localStorage.getItem("usuarios");
         const usuariosList: Usuario[] = usuariosJSON ? JSON.parse(usuariosJSON) : [];
         setUsuarios(usuariosList);
     }, []);
 
-    // Funciones para estadísticas
+    // ----------------------
+    // Funciones de estadísticas
+    // ----------------------
+    // Cada una es pequeña y legible; separamos la lógica para mantener el JSX limpio.
     const getTotalUsers = () => usuarios.length;
     const getTotalProducts = () => productos.length;
     const getDuocUsers = () => usuarios.filter(u => u.descuentoDuoc).length;
     const getAdminUsers = () => usuarios.filter(u => u.rol === 'admin').length;
+
+    // Agrupa los productos por su campo `categoria` y cuenta cuántos hay por categoría
     const getProductsByCategory = () => {
         const categories: { [key: string]: number } = {};
         productos.forEach(p => {
@@ -29,6 +45,7 @@ const Admin_Dashboard: React.FC = () => {
         return categories;
     };
 
+    // Formatea nombres de categoría tipo 'img_mousepad' => 'Img Mousepad'
     const formatCategoria = (categoria: string): string => {
         return categoria.replace(/_/g, ' ').split(' ').map(word => 
             word.charAt(0).toUpperCase() + word.slice(1)
@@ -37,6 +54,11 @@ const Admin_Dashboard: React.FC = () => {
 
     const categoriesData = getProductsByCategory();
 
+    // ----------------------
+    // JSX: estructura del dashboard
+    // ----------------------
+    // La UI está compuesta por tarjetas (cards) de Bootstrap que consumen las funciones
+    // anteriores para mostrar los números. Intentamos evitar lógica pesada dentro del JSX.
     return (
         <div className="p-4">
             <div className="row g-4">
@@ -212,3 +234,13 @@ const Admin_Dashboard: React.FC = () => {
 };
 
 export default Admin_Dashboard;
+
+/*
+  Dónde se importa/usa este componente `Admin_Dashboard`:
+  - src/App.tsx
+    * Importa `Admin_Dashboard` y lo usa en una ruta del router. Ver `Route index element={<Admin_Dashboard />}`.
+
+  Por qué:
+  - Es la vista principal del área de administración que muestra métricas y un resumen
+    rápido del estado del sistema (usuarios, productos, categorías).
+*/

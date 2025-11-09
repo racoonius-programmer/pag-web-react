@@ -34,8 +34,5 @@ export const usarDescuento = (producto: Product) => {
         
     }, [producto]); // Dependencia: solo recalcular si el producto cambia.
 
-    // NOTA: Para que esto reaccione instantáneamente al login/logout, idealmente 
-    // el estado de la sesión debería estar en un Contexto y el Hook debería depender de ese Contexto.
-
     return { precioFinal, tieneDescuento };
 };

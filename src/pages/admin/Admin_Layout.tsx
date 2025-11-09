@@ -2,26 +2,47 @@
 import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 
+/*
+  Admin_Layout
+  -------------
+  Layout general para la sección de administración.
+
+  - Proporciona un sidebar (colapsable) con navegación interna para las rutas
+    del admin (Dashboard, User Manager, Product Manager, etc.).
+  - Usa `Outlet` para renderizar la ruta hija seleccionada dentro del layout.
+  - No contiene datos complejos; solo maneja estado UI (sidebar collapsed)
+    y la navegación usando `useNavigate`.
+*/
 const Admin_Layout: React.FC = () => {
+    // Estado: si la barra lateral está colapsada o expandida
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+    // Hooks de react-router para navegación y para conocer la ruta actual
     const navigate = useNavigate();
     const location = useLocation();
 
+    // Alterna el estado del sidebar
     const toggleSidebar = () => setSidebarCollapsed(!sidebarCollapsed);
 
+    // Comprueba si la ruta actual coincide exactamente con `path`.
+    // Usado para marcar la opción activa en el sidebar.
     const isActive = (path: string) => location.pathname === path;
 
+    // Navega a la ruta indicada
     const handleNavigation = (path: string) => {
         navigate(path);
     };
 
     return (
         <div style={{ backgroundColor: '#121212', minHeight: '100vh' }} className="d-flex">
-            {/* Sidebar */}
+            {/* Sidebar: contiene botones que navegan dentro del área admin */}
             <div className={`bg-dark text-white ${sidebarCollapsed ? 'collapsed-sidebar' : 'sidebar'}`}>
                 <div className="sidebar-header p-3 border-bottom border-secondary">
                     <div className="d-flex align-items-center justify-content-between">
+                        {/* Si no está colapsado, mostrar el título */}
                         {!sidebarCollapsed && <h5 className="mb-0">Admin Panel</h5>}
+
+                        {/* Botón de colapsar/expandir */}
                         <button 
                             className="btn btn-outline-light btn-sm"
                             onClick={toggleSidebar}
@@ -33,6 +54,8 @@ const Admin_Layout: React.FC = () => {
 
                 <nav className="sidebar-nav mt-3">
                     <ul className="nav flex-column">
+                        {/* Cada botón usa `handleNavigation` y `isActive` para controlar estilos */}
+
                         {/* Dashboard */}
                         <li className="nav-item">
                             <button
@@ -72,12 +95,12 @@ const Admin_Layout: React.FC = () => {
                             </button>
                         </li>
 
-                        {/* Divider */}
+                        {/* Divider visual */}
                         <li className="nav-item">
                             <hr className="text-secondary mx-3" />
                         </li>
 
-                        {/* Volver al sitio */}
+                        {/* Volver al sitio (ruta pública) */}
                         <li className="nav-item">
                             <button
                                 className="nav-link text-start w-100 border-0 bg-transparent text-white-50"
@@ -91,12 +114,12 @@ const Admin_Layout: React.FC = () => {
                 </nav>
             </div>
 
-            {/* Main Content */}
+            {/* Main Content: las rutas hijas se renderizan aquí */}
             <div className="flex-grow-1">
                 <Outlet />
             </div>
 
-            {/* Estilos CSS */}
+            {/* Estilos CSS locales al componente: definen ancho y comportamiento del sidebar */}
             <style>{`
                 .sidebar {
                     width: 280px;
@@ -129,3 +152,15 @@ const Admin_Layout: React.FC = () => {
 };
 
 export default Admin_Layout;
+
+/*
+  Dónde se importa / usa este Layout:
+  - src/App.tsx
+    * Se importa `Admin_Layout` y se emplea como layout para las rutas del area
+      de administración (por ejemplo: `<Route path="/admin" element={<Admin_Layout/>}> ...`).
+
+  Por qué:
+  - Centraliza la navegación y el contenedor visual del panel admin. Las rutas hijas
+    se renderizan en el `<Outlet />` permitiendo que todas compartan el mismo sidebar
+    y estilos sin duplicar código.
+*/

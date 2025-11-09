@@ -5,37 +5,61 @@ import productosData from '../data/productos.json';
 import type { Product, Comentario } from '../types/Product';
 
 const ProductDetail: React.FC = () => {
+  /*
+    Página: ProductDetail
+    ---------------------
+    Muestra la página de detalle de un producto específico identificado por
+    el parámetro de ruta `codigo`. Incluye:
+    - Imagen y descripción del producto.
+    - Selector de cantidad con botones + / -.
+    - Cálculo de precio con posible descuento (`descuentoDuoc`).
+    - Funcionalidad para añadir al carrito y a la wishlist (simulada en localStorage).
+    - Sección de reseñas: muestra comentarios y permite enviar uno nuevo.
+
+    Notas:
+    - Los datos se cargan desde `src/data/productos.json` y se castea a `Product[]`.
+    - Cualquier escritura de estado persistente en este componente (como wishlist
+      o puntos) usa `localStorage` de forma simple
+  */
+
+  // Parametro `codigo` extraído de la URL (definido en las rutas de App.tsx).
   const { codigo } = useParams<{ codigo: string }>();
   const navigate = useNavigate();
+
+  // Al cambiar el `codigo` (navegar a otro producto) desplazamos la página arriba.
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [codigo]);
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [codigo]);
-
+  // Carga de productos desde JSON; el JSON puede tener la forma { productos: [...] }
+  // o ser directamente el array, por eso el fallback con `||`.
   const productos: Product[] = (productosData as any).productos || (productosData as any);
 
+  // Buscar el producto que coincide con el `codigo` de la URL.
   const producto = productos.find((p) => p.codigo === codigo);
 
+  // Estado local: cantidad seleccionada y lista de comentarios (reseñas).
   const [cantidad, setCantidad] = useState<number>(1);
   const [comentarios, setComentarios] = useState<Comentario[]>([]);
 
+  // Inicializamos `comentarios` a partir del producto si existen; si no, usamos
+  // un comentario de ejemplo como fallback para mostrar la sección.
   useEffect(() => {
     if (producto && Array.isArray(producto.comentarios)) {
       setComentarios(producto.comentarios as Comentario[]);
     } else {
-      // fallback: comentarios de ejemplo (opcional)
+      // fallback: comentarios de ejemplo 
       setComentarios([
         { usuario: 'María López', calificacion: 5, texto: 'Excelente producto.', fecha: '2025-09-04' },
       ]);
     }
   }, [producto]);
 
+  // Estado del formulario de reseña: score (1-5) y texto del comentario.
   const [score, setScore] = useState<number | ''>('');
   const [commentText, setCommentText] = useState<string>('');
 
+  // Actualiza el título de la pestaña según el producto (o indica no encontrado).
   useEffect(() => {
     if (producto) {
       document.title = `${producto.nombre} - Detalle del Producto`;
@@ -44,6 +68,7 @@ const ProductDetail: React.FC = () => {
     }
   }, [producto]);
 
+  // Si no encontramos el producto, mostramos un mensaje sencillo al usuario.
   if (!producto) {
     return (
       <div className="container py-5 text-center text-white">
@@ -52,6 +77,7 @@ const ProductDetail: React.FC = () => {
     );
   }
 
+  // Información del usuario logueado (si existe) leída desde localStorage.
   const usuarioLogueado = (() => {
     try {
       return JSON.parse(localStorage.getItem('usuarioActual') || 'null');
@@ -60,45 +86,50 @@ const ProductDetail: React.FC = () => {
     }
   })();
 
+  // Determinar si el usuario tiene descuento DUOC y calcular precio final.
   const esDuoc = !!(usuarioLogueado && usuarioLogueado.descuentoDuoc === true);
   const precioOriginal = producto.precio || 0;
   const precioFinal = esDuoc ? Math.round(precioOriginal * 0.8) : precioOriginal;
 
+  // Handlers de cantidad.
   const decrease = () => setCantidad((q) => Math.max(1, q - 1));
   const increase = () => setCantidad((q) => q + 1);
 
+  // Funcionalidad para añadir al carrito: usa el contexto `useCartContext`.
   const { addToCart } = useCartContext();
   const agregarAlCarrito = () => {
+    // Si no hay usuario, redirigimos al login antes de permitir añadir.
     if (!usuarioLogueado) {
       navigate('/login');
       return;
     }
-    
-    // Crear el producto con el precio final (con descuento si aplica)
+
+    // Creamos un objeto de producto con el `precioFinal` calculado y lo agregamos.
     const productoConPrecioFinal = {
       ...producto,
-      precio: precioFinal // Usar el precio final calculado (con descuento DUOC si aplica)
+      precio: precioFinal, // Usar el precio final calculado (con descuento DUOC si aplica)
     };
-    
+
     addToCart(productoConPrecioFinal, cantidad);
     navigate('/carrito');
   };
 
+  // Simulación de 'wishlist' guardada en localStorage. Evita duplicados.
   const addToWishlist = () => {
     if (!usuarioLogueado) {
       navigate('/login');
       return;
     }
-    // Simulado: podría guardarse en localStorage bajo 'wishlist'
     const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]') as any[];
     if (!wishlist.find((p) => p.codigo === producto.codigo)) {
       wishlist.push({ codigo: producto.codigo, nombre: producto.nombre, imagen: producto.imagen });
       localStorage.setItem('wishlist', JSON.stringify(wishlist));
     }
-    // Mensaje simple
+    // Mensaje simple (en una app real usarías un toast o componente de UI).
     alert(`¡${producto.nombre} añadido a la lista de deseos!`);
   };
 
+  // Renderiza la lista de comentarios/ reseñas.
   const renderizarComentarios = () =>
     comentarios.map((c, i) => (
       <div key={i} className="list-group-item list-group-item-dark mb-3 rounded">
@@ -110,6 +141,7 @@ const ProductDetail: React.FC = () => {
       </div>
     ));
 
+  // Envío de un nuevo comentario: validación simple en cliente y añadir al estado.
   const submitComentario = (e: React.FormEvent) => {
     e.preventDefault();
     if (!score || commentText.trim() === '') {
@@ -234,3 +266,13 @@ const ProductDetail: React.FC = () => {
 };
 
 export default ProductDetail;
+
+/*
+  Archivos que importan / usan `ProductDetail` (y por qué):
+  - `src/App.tsx`:
+      - Monta `ProductDetail` en la ruta `/producto/:codigo` o equivalente para mostrar
+        la página de detalle cuando el usuario selecciona un producto.
+
+  - `src/pages/ProductShop.tsx` / `src/components/ProductCard.tsx`:
+      - Normalmente el listado de productos enlaza a esta página pasando `codigo`.
+*/

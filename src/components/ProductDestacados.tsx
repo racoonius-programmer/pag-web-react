@@ -1,13 +1,15 @@
 import React, { useMemo } from 'react';
 import ProductoCard from './ProductCard';
 import type { Product } from '../types/Product';
-// ⚠️ Importar el tipo de usuario (asumiendo que está disponible)
+// Tipo Usuario (se usa para decidir si aplica descuento DUOC al usuario actual)
 import type { Usuario } from '../types/User'; 
 
-// Importa la base de datos de productos (asumiendo que está en data/)
+// JSON local que actúa como DB de productos (src/data/productos.json)
 import productosDB from '../data/productos.json';
 
-// ⚠️ CÓDIGO AÑADIDO: Función auxiliar para obtener el usuario
+// Función auxiliar para obtener el usuario actual desde localStorage.
+// - Lee `usuarios` (array) y `usuarioActual` (string o JSON stringificado).
+// - Devuelve el objeto Usuario correspondiente o null si no hay ninguno.
 const getUsuarioDB = (): Usuario | null => {
     const usuariosJSON = localStorage.getItem("usuarios");
     const usuarios: Usuario[] = usuariosJSON ? JSON.parse(usuariosJSON) : [];
@@ -15,28 +17,39 @@ const getUsuarioDB = (): Usuario | null => {
     const usuarioActualRaw = localStorage.getItem("usuarioActual");
     if (!usuarioActualRaw) return null;
 
-    // usuarioActual puede ser "username" o un JSON stringificado del objeto usuario.
-    let usernameActual: string | null = null;
-    try {
-      const parsed = JSON.parse(usuarioActualRaw);
-      if (parsed && typeof parsed === 'object' && parsed.username) usernameActual = parsed.username;
-      else if (typeof parsed === 'string') usernameActual = parsed;
-    } catch {
-      // no es JSON, tratar como username plano
-      usernameActual = usuarioActualRaw;
-    }
+        // `usuarioActual` puede ser un username (string) o un objeto stringificado.
+        // Intentamos parsearlo: si es un objeto con `username` lo usamos; si parsea a string también lo aceptamos.
+        let usernameActual: string | null = null;
+        try {
+            const parsed = JSON.parse(usuarioActualRaw);
+            if (parsed && typeof parsed === 'object' && parsed.username) usernameActual = parsed.username;
+            else if (typeof parsed === 'string') usernameActual = parsed;
+        } catch {
+            // Si no es JSON parseable, tratamos `usuarioActualRaw` como username plano.
+            usernameActual = usuarioActualRaw;
+        }
 
     if (!usernameActual) return null;
     return usuarios.find(u => u.username === usernameActual) || null;
 };
 
+
+/*
+    ProductosDestacados
+    - Propósito: mostrar la sección "Lo más vendido" con hasta 3 productos seleccionados aleatoriamente.
+    - Uso: componente sin props; importarlo en una página y renderizar <ProductosDestacados />.
+    - Comportamiento: decide si el usuario tiene `descuentoDuoc` leyendo localStorage y pasa
+        esa información a `ProductoCard` vía la prop `esDuoc`.
+*/
+
 const ProductosDestacados: React.FC = () => {
     
-    // ⚠️ Lógica para obtener el estado de descuento del usuario
+    // Obtener usuario actual (memoizado para no leer localStorage en cada render)
     const usuarioLogueado = useMemo(getUsuarioDB, []);
+    // Determina si aplica descuento DUOC al usuario (booleano)
     const esDuoc = !!(usuarioLogueado && usuarioLogueado.descuentoDuoc === true);
     
-    // 1. Lógica para seleccionar 3 productos al azar (Migrada desde Vanilla JS)
+    // Selección de 3 productos al azar (se hace una vez al montar)
     const productosSeleccionados = useMemo(() => {
         const productos: Product[] = productosDB as Product[];
 
@@ -45,15 +58,12 @@ const ProductosDestacados: React.FC = () => {
             return [];
         }
         
-        // Simulación: toma 3 al azar
+        // Selección: clona, mezcla aleatoriamente y toma los primeros 3
         const seleccion = productos
-            // 1. Clona el array para no modificar el original
-            .slice() 
-            // 2. Ordena aleatoriamente
+            .slice()
             .sort(() => 0.5 - Math.random())
-            // 3. Toma los primeros 3
             .slice(0, 3);
-            
+
         return seleccion;
     }, []); // Se ejecuta una sola vez al montar el componente
 
@@ -68,7 +78,7 @@ const ProductosDestacados: React.FC = () => {
                     <div className="d-flex flex-row justify-content-center overflow-auto gap-4 px-2" id="mas-vendidos" style={{scrollSnapType:'x mandatory'}}>
                         {productosSeleccionados.map(producto => (
                             <div style={{ minWidth: '320px', scrollSnapAlign:'start', margin: '0 auto' }} key={producto.codigo}>
-                                {/* ⚠️ CAMBIO PRINCIPAL: Pasar la prop 'esDuoc' al ProductoCard */}
+                                {/* Pasar la prop 'esDuoc' al ProductoCard para que aplique el descuento si aplica */}
                                 <ProductoCard producto={producto} esDuoc={esDuoc} /> 
                             </div>
                         ))}
@@ -82,3 +92,8 @@ const ProductosDestacados: React.FC = () => {
 };
 
 export default ProductosDestacados;
+
+/*
+    Llamadas a este componente:
+    - `src/pages/Inicio.tsx` importa y renderiza `<ProductosDestacados />`.
+*/

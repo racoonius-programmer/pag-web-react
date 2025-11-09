@@ -13,11 +13,11 @@ interface Option {
 }
 
 /**
- * Custom Hook para cargar y gestionar la selección de Regiones y Comunas de Chile.
- * * Este hook asume que el archivo 'chileGeo.json' está en la ruta /json/chileGeo.json.
+ * Custom Hook para cargar y gestionar la selección de Regiones y Comunas de Chile..
  * * @param initialRegion Región seleccionada inicialmente (opcional).
  * @param initialComuna Comuna seleccionada inicialmente (opcional).
  */
+
 export function useRegionesComunas(initialRegion: string = '', initialComuna: string = '') {
   // Estado para la data cruda cargada del JSON
   const [regionesData, setRegionesData] = useState<ComunaRegionData[]>([]);
@@ -31,15 +31,13 @@ export function useRegionesComunas(initialRegion: string = '', initialComuna: st
 
   // --- LÓGICA DE CARGA DE DATOS (Se ejecuta solo una vez) ---
   useEffect(() => {
-    const JSON_PATH = "/data/chileGeo.json"; // 🚨 VERIFICA ESTA RUTA EN TU PROYECTO 🚨
+    const JSON_PATH = "/data/chileGeo.json"; 
 
     async function cargarRegiones() {
       setIsLoading(true);
       try {
         const res = await fetch(JSON_PATH);
         
-        // **CRÍTICO:** Si el servidor devuelve un 404 (res.ok es false),
-        // no intenta parsear el HTML de error, previniendo el SyntaxError.
         if (!res.ok) {
             throw new Error(`Error al cargar el archivo. Ruta: ${JSON_PATH}. Código: ${res.status}`);
         }
@@ -68,7 +66,7 @@ export function useRegionesComunas(initialRegion: string = '', initialComuna: st
     setSelectedComuna('');
   }, []);
 
-  // Función para establecer la comuna (puede ser útil al precargar)
+  // Función para establecer la comuna 
   const handleComunaChange = useCallback((comuna: string) => {
     setSelectedComuna(comuna);
   }, []);
@@ -118,3 +116,16 @@ export function useRegionesComunas(initialRegion: string = '', initialComuna: st
     handleComunaChange, 
   };
 }
+
+/*
+  Usos de este hook `useRegionesComunas` en el proyecto:
+  - src/pages/User_Register.tsx
+    * Se importa y utiliza para poblar los selects de región/comuna en el formulario de registro.
+
+  - src/pages/UserPerfil.tsx
+    * Se utiliza para permitir al usuario ver/editar su región y comuna desde su perfil.
+
+  - src/components/RegionComunaSelects.tsx
+    * Componente presentacional / de formulario que consume los valores/opciones que
+      provee este hook (se integra en las páginas anteriores).
+*/

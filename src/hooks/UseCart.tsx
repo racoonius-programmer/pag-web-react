@@ -101,28 +101,68 @@ const useCart = () => {
 interface CartProviderProps {
   children: ReactNode;
 }
+// Props para el Provider del carrito
+//   Se usa para envolver la app en `main.tsx` y así distribuir el estado del carrito
+//   a cualquier componente que lo necesite mediante `useCartContext()`.
+interface CartProviderProps {
+  children: ReactNode;
+}
 
-export const CartProvider: React.FC<CartProviderProps> = ({children}) => {
-  const cartFunctions = useCart();
+// CartProvider
+// - Componente que envuelve la aplicación y proporciona el contexto del carrito.
+// - Internamente llama a `useCart()` (hook interno que contiene la lógica del carrito)
+//   y expone sus funciones/estado a través del contexto `CartContext`.
+export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
+  const cartFunctions = useCart(); // obtiene { cart, addToCart, removeFromCart, ... }
 
   return (
+    // El value del Provider es el objeto con las funciones y estado del carrito
     <CartContext.Provider value={cartFunctions}>
       {children}
     </CartContext.Provider>
   );
 };
 
-
-
-
-
 // ----------------------------------------------------------------------
-// Hook de consumo (se usa en componentes)
-// ----------------------------------------------------------------------
+// Hook de consumo: useCartContext
+// - Este es el hook que deben usar los componentes cuando necesitan acceder
+//   al carrito (leer items, agregar, remover, vaciar o consultar total).
+// - Lanza un error claro si se intenta usar fuera del provider 
+//
+// Motivo: preferimos exponer solo este hook a los componentes en lugar de
+// exponer el contexto directamente para mantener una API simple y tipada.
 export const useCartContext = () => {
   const context = useContext(CartContext);
   if (context === undefined) {
+    // Mensaje intencionalmente claro para que el dev sepa envolver la app
     throw new Error('useCartContext debe usarse dentro de un CartProvider');
   }
   return context;
 };
+
+/*
+  Archivos que importan / usan este hook / provider en el proyecto y por qué:
+
+  - src/main.tsx
+    * Importa y usa <CartProvider> para envolver la aplicación. Esto es necesario
+      para que cualquier componente pueda acceder al carrito usando `useCartContext()`.
+
+  - src/pages/ProductsCarrito.tsx
+    * Importa `useCartContext` para leer los items del carrito (`cart`) y el
+      `totalAmount`, y para permitir acciones como `clearCart`.
+
+  - src/pages/ProductDetail.tsx
+    * Importa `useCartContext` para poder agregar el producto mostrado al carrito
+      usando `addToCart`.
+
+  - src/pages/Payment.tsx
+    * Usa `useCartContext` para obtener el carrito y el monto total al realizar el pago,
+      y para vaciar el carrito después del pago con `clearCart`.
+
+  - src/components/ProductCard.tsx
+    * Consume `useCartContext` para exponer un botón "Agregar" que llama `addToCart`.
+
+  - src/components/CartItem.tsx
+    * Consume `useCartContext` para permitir incrementar/decrementar o eliminar
+      unidades mediante `addToCart` / `removeFromCart`.
+*/

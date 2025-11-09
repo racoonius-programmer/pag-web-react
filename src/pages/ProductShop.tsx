@@ -7,6 +7,30 @@ import { useProducts } from '../hooks/UseProducts';
 // Importa el tipo de usuario (para una mejor tipificación)
 import type { Usuario } from '../types/User';
 
+/*
+    ProductShop (documentación rápida - TOP)
+    -------------------------------------------------
+    Ideas generales y propósito:
+    - Esta página es la vista principal de la tienda. Lista productos y permite
+        aplicar filtros (categoría, búsqueda, precio, fabricante, distribuidor)
+        y ordenar los resultados.
+    - Consume `useProducts()` (hook personalizado) como fuente de datos.
+    - Mantiene estados locales para controles de UI (slider de precio, checkboxes,
+        criterio de orden, término de búsqueda) y recalcula la lista mostrada cada vez
+        que cambian los insumos (productos, parámetros URL o filtros).
+    - Está pensada para ser una capa de presentación + filtrado; la fuente de
+        verdad de los datos está en el hook `useProducts` / `productos.json`.
+
+    Resumen rápido:
+    1. Lee `useProducts()` para entender de dónde vienen los productos.
+    2. Revisa los estados declarados abajo (precio, fabricantes, distribuidores...)
+         para ver cómo afectan el filtrado.
+    3. Mira el `useEffect` central que aplica los filtros y ordena `productos`.
+    4. El render muestra un sidebar con filtros y un grid de `ProductoCard`.
+    5. Lee la función auxiliar `getUsuarioDB()` para entender cómo se obtiene
+        el usuario actual desde localStorage.
+*/
+
 // Función auxiliar para obtener el usuario
 const getUsuarioDB = (): Usuario | null => {
     const usuariosJSON = localStorage.getItem("usuarios");
@@ -340,3 +364,24 @@ const ProductShop: React.FC = () => {
 };
 
 export default ProductShop;
+
+/*
+    Archivos que importan / usan `ProductShop` (y por qué):
+    - `src/App.tsx`:
+            - Monta `ProductShop` en la ruta `/productos`. Es la entrada principal a la
+                vista de tienda donde los usuarios navegan y filtran productos.
+
+    - `src/components/Header.tsx`:
+            - Contiene enlaces/menús que llevan a `/productos` o a categorías específicas
+                (ej. "Ver Todo"), permitiendo al usuario acceder rápidamente a la tienda.
+
+    - `src/components/BannerBienvenida.tsx`:
+            - Incluye un CTA "Ver productos" que navega a `/productos` y sirve como
+                acceso directo desde la home.
+
+    - `src/components/ProductCard.tsx`:
+            - No "importa" ProductShop pero sí es consumido por él: `ProductShop` renderiza
+                `ProductoCard` para cada producto. Si modificas la API de props de
+                `ProductoCard`, actualiza este archivo.
+
+*/

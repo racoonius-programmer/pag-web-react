@@ -59,3 +59,4 @@ export interface ModalState {
     message: string;
     onHiddenCallback?: () => void;
 }
+

@@ -5,15 +5,37 @@ import { useModal } from '../hooks/Modal';
 import RegionComunaSelects from '../components/RegionComunaSelects';
 import { InputWithValidation } from '../components/InputsRegistro';
 
+/**
+ * UserPerfil.tsx
+ * --------------
+ * Página para ver y editar el perfil del usuario autenticado.
+ * Propósitos principales:
+ * - Cargar los datos del `usuarioActual` desde localStorage al montar.
+ * - Permitir editar campos no críticos (nombre, fecha, teléfono, región/comuna, dirección, fotoUrl).
+ * - Validar los campos en el cliente antes de persistir los cambios en localStorage.
+ * - Reutiliza hooks y componentes ya existentes (`useRegionesComunas`, `useModal`, `RegionComunaSelects`, `InputWithValidation`).
+ *
+ * Notas:
+ * - Los datos de usuario se almacenan localmente en `localStorage` en este proyecto (simulación).
+ * - Al guardar, se actualiza tanto `usuarioActual` como el array `usuarios` en localStorage,
+ *   preservando campos sensibles (como la contraseña) al usar spread sobre el objeto existente.
+ * - La lógica de validación aquí es similar a `User_Register` — mantenerla sincronizada si se cambia.
+ */
+
 const UserPerfil: React.FC = () => {
+    // Estados del formulario: campos editables del perfil.
     const [username, setUsername] = useState('');
     const [correo, setCorreo] = useState('');
     const [fechaNacimiento, setFechaNacimiento] = useState('');
     const [telefono, setTelefono] = useState('');
     const [direccion, setDireccion] = useState('');
+    // `fotoUrl` es la URL de la imagen de perfil; se carga una imagen por defecto si no existe.
     const [fotoUrl, setFotoUrl] = useState('img/header/user-logo-generic-white-alt.png');
-    
-    // Estados de validación
+
+    // Estados de validación y control de interacción:
+    // - `errors`: mensajes por campo (si existe, se muestra debajo del input).
+    // - `touched`: marca qué campos han sido tocados por el usuario.
+    // - `isFormTouched`: flag global para habilitar el display de validaciones.
     const [errors, setErrors] = useState<{
         username?: string;
         fechaNacimiento?: string;
@@ -25,7 +47,8 @@ const UserPerfil: React.FC = () => {
     const [touched, setTouched] = useState<Record<string, boolean>>({});
     const [isFormTouched, setIsFormTouched] = useState(false);
 
-    // Usar hook para regiones y comunas
+    // Hook para regiones y comunas: devuelve opciones y handlers para seleccionar.
+    // Se inicia sin selección ('','') ya que cargaremos la selección desde localStorage.
     const {
         regionesOptions,
         comunasOptions,
@@ -35,7 +58,7 @@ const UserPerfil: React.FC = () => {
         handleComunaChange,
     } = useRegionesComunas('', '');
 
-    // Modal
+    // Hook modal reutilizable (muestra mensajes informativos/errores al usuario).
     const modal = useModal();
 
     // Cargar datos del usuario al montar
@@ -82,7 +105,11 @@ const UserPerfil: React.FC = () => {
         }
     }, [comunasOptions]); // Se ejecuta cuando comunasOptions cambia
 
+    // =========================
     // Funciones de validación (mismas que en User_Register)
+    // Cada función devuelve un string vacío cuando es válida, o el mensaje de error.
+    // Mantener estas funciones sincronizadas con las reglas del registro.
+    // =========================
     const validarUsername = (value: string): string => {
         if (!value.trim()) return 'El nombre de usuario es obligatorio.';
         if (value.length < 3) return 'El nombre debe tener al menos 3 caracteres.';
@@ -92,6 +119,7 @@ const UserPerfil: React.FC = () => {
     };
 
     const validarFechaNacimiento = (value: string): string => {
+        // Validaciones básicas: presente, no futura, y edad entre 18 y 120.
         if (!value) return 'La fecha de nacimiento es obligatoria.';
         
         const fecha = new Date(value);
@@ -112,7 +140,8 @@ const UserPerfil: React.FC = () => {
     };
 
     const validarTelefono = (value: string): string => {
-        if (!value.trim()) return ''; // Opcional
+        // El teléfono es opcional, pero si se entrega debe tener entre 8 y 11 dígitos.
+        if (!value.trim()) return '';
         
         // Remover espacios para validación
         const telefonoLimpio = value.replace(/\s/g, '');
@@ -425,3 +454,34 @@ const UserPerfil: React.FC = () => {
 };
 
 export default UserPerfil;
+
+/*
+    Archivos que importan/enlazan a `UserPerfil` y por qué:
+
+    - src/App.tsx
+        -> Importa `UserPerfil` y lo expone en una ruta protegida para que el usuario
+             pueda ver y editar su perfil.
+
+    - src/hooks/RegionesComunas.ts
+        -> Proporciona las opciones y handlers para región/comuna; usado aquí para
+             permitir al usuario ver/editar su región y comuna.
+
+    - src/hooks/Modal.ts
+        -> El hook `useModal` se usa para mostrar mensajes de confirmación o error
+             al guardar cambios en el perfil.
+
+    - src/components/RegionComunaSelects.tsx
+        -> Componente UI usado para seleccionar región y comuna dentro del formulario.
+
+    - src/components/InputsRegistro.tsx
+        -> Provee `InputWithValidation` reutilizado aquí para inputs con mensajes de validación.
+
+    - src/pages/admin/Admin_Users.tsx
+        -> Muestra una vista administrativa que también usa la propiedad `fotoPerfil` y
+             comparte la misma estructura de datos de usuario (relación conceptual).
+
+    Resumen:
+    - `UserPerfil` permite a usuarios autenticados editar su información. Se integra con
+        hooks y componentes de UI para validación y selección de región/comuna, y muestra
+        feedback mediante el modal global.
+*/

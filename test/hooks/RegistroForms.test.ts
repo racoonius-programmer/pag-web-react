@@ -258,4 +258,124 @@ describe('Pruebas unitarias Registro', () => {
         expect(navigateFnMock).toHaveBeenCalledWith('/main');
     });
 
+
+// Corregir el test de Admin (Línea 300)
+test('Debe registrar exitosamente y REDIRIGIR a /admin si hay un ADMIN logueado (Línea 300)', () => {
+    // Arrange
+    localStorage.setItem('usuarioActual', JSON.stringify({ id: 99, rol: 'admin' })); // Simular admin logueado
+    const { result } = renderHook(() => useRegistroForm('Metropolitana', 'Santiago', showModalMock, navigateFnMock));
+    
+    // Llenar formulario 100% válido para nuevo usuario
+    act(() => {
+        result.current.handleChange(createChangeEvent('username', 'Nuevo Usuario'));
+        result.current.handleChange(createChangeEvent('correo', 'nuevo2@duoc.cl'));
+        result.current.handleChange(createChangeEvent('fechaNacimiento', '2000-01-01'));
+        result.current.handleChange(createChangeEvent('contrasena', 'password123'));
+        result.current.handleChange(createChangeEvent('confirmarContrasena', 'password123'));
+        result.current.handleChange(createChangeEvent('direccion', 'Direccion Larga 123'));
+        // 💡 CLAVE: Asegurar que el teléfono esté completo y válido
+        result.current.handleChange(createChangeEvent('telefono', '912345678')); 
+    });
+
+    // Act
+    act(() => {
+        result.current.handleSubmit(createSubmitEvent());
+    });
+
+    // Assert (Verificar que se intentó redirigir a /admin)
+    const lastCall = showModalMock.mock.calls.at(-1); 
+    
+    // Aseguramos que el último llamado es el de éxito y tiene el callback
+    expect(lastCall).toBeDefined();
+    const callbackRedireccion = lastCall![2]; 
+    expect(typeof callbackRedireccion).toBe('function'); 
+
+    act(() => {
+        callbackRedireccion();
+    });
+    
+    expect(localStorage.getItem('usuarioActual')).toContain('"rol":"admin"'); 
+    expect(navigateFnMock).toHaveBeenCalledWith('/admin'); 
+});
+
+// Corregir el test de Fallback (Línea 315)
+test('Debe usar window.location.href como FALLBACK si navigateFn es NULL (Línea 315)', () => {
+    // Arrange
+    const originalLocationHref = window.location.href;
+    Object.defineProperty(window, 'location', {
+        writable: true,
+        value: { href: originalLocationHref }
+    });
+    window.location.href = originalLocationHref;
+    const locationHrefSpy = vi.spyOn(window.location, 'href', 'set');
+    
+    // Notar que NO pasamos navigateFn, lo que forzará el else en la línea 315
+    const { result } = renderHook(() => useRegistroForm('Metropolitana', 'Santiago', showModalMock, undefined)); 
+
+    // Llenar formulario 100% válido
+    act(() => {
+        result.current.handleChange(createChangeEvent('username', 'Solo Window'));
+        result.current.handleChange(createChangeEvent('correo', 'window@duoc.cl'));
+        result.current.handleChange(createChangeEvent('fechaNacimiento', '2000-01-01'));
+        result.current.handleChange(createChangeEvent('contrasena', 'password123'));
+        result.current.handleChange(createChangeEvent('confirmarContrasena', 'password123'));
+        result.current.handleChange(createChangeEvent('direccion', 'Direccion Larga 123'));
+        // 💡 CLAVE: Asegurar que el teléfono esté completo y válido
+        result.current.handleChange(createChangeEvent('telefono', '912345678')); 
+    });
+
+    // Act (Submit)
+    act(() => {
+        result.current.handleSubmit(createSubmitEvent());
+    });
+    
+    // Simular click en "Aceptar" del modal
+    const lastCall = showModalMock.mock.calls.at(-1); 
+    
+    // Aseguramos que el último llamado es el de éxito y tiene el callback
+    expect(lastCall).toBeDefined();
+    const callbackRedireccion = lastCall![2];
+    expect(typeof callbackRedireccion).toBe('function'); 
+
+    act(() => {
+        callbackRedireccion();
+    });
+
+    // Assert
+    expect(locationHrefSpy).toHaveBeenCalledWith('/main');
+    
+    locationHrefSpy.mockRestore();
+});
+
+    test('Validaciones en tiempo real deben fallar si la fecha es FUTURA (Línea 166)', () => {
+        // Arrange
+        const { result } = renderHook(() => useRegistroForm('R', 'C'));
+    
+        // Act
+        act(() => {
+            // La fecha mockeada es 2025-01-15, esta es 2025-02-01 (futura)
+            result.current.handleChange(createChangeEvent('fechaNacimiento', '2025-02-01'));
+        });
+    
+        // Assert
+        expect(result.current.validationMessages.fechaNacimiento.message).toContain('fecha futura');
+        expect(result.current.validationMessages.fechaNacimiento.className).toBe('text-danger');
+    });
+    
+    test('Validaciones en tiempo real deben fallar si es MAYOR a 100 años (Línea 170)', () => {
+        // Arrange
+        // Fecha actual mockeada: 2025-01-15. MAX_AGE = 100.
+        const { result } = renderHook(() => useRegistroForm('R', 'C'));
+    
+        // Act
+        act(() => {
+            // Nació en 1920 (tendría 105 años)
+            result.current.handleChange(createChangeEvent('fechaNacimiento', '1920-01-01'));
+        });
+    
+        // Assert
+        expect(result.current.validationMessages.fechaNacimiento.message).toContain('más de 100');
+        expect(result.current.validationMessages.fechaNacimiento.className).toBe('text-danger');
+    });
+
 });

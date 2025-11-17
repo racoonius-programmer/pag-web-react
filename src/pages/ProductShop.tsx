@@ -3,9 +3,7 @@ import { useLocation } from 'react-router-dom';
 import ProductoCard from '../components/ProductCard';
 import type { Product } from '../types/Product';
 import { useProducts } from '../hooks/UseProducts';
-
-// Importa el tipo de usuario (para una mejor tipificación)
-import type { Usuario } from '../types/User';
+import { useUsuarioActual } from '../hooks/UseUsuarioActual';
 
 /*
     ProductShop (documentación rápida - TOP)
@@ -15,6 +13,7 @@ import type { Usuario } from '../types/User';
         aplicar filtros (categoría, búsqueda, precio, fabricante, distribuidor)
         y ordenar los resultados.
     - Consume `useProducts()` (hook personalizado) como fuente de datos.
+    - Usa `useUsuarioActual()` para obtener información del usuario logueado.
     - Mantiene estados locales para controles de UI (slider de precio, checkboxes,
         criterio de orden, término de búsqueda) y recalcula la lista mostrada cada vez
         que cambian los insumos (productos, parámetros URL o filtros).
@@ -27,40 +26,12 @@ import type { Usuario } from '../types/User';
          para ver cómo afectan el filtrado.
     3. Mira el `useEffect` central que aplica los filtros y ordena `productos`.
     4. El render muestra un sidebar con filtros y un grid de `ProductoCard`.
-    5. Lee la función auxiliar `getUsuarioDB()` para entender cómo se obtiene
-        el usuario actual desde localStorage.
 */
-
-// Función auxiliar para obtener el usuario
-const getUsuarioDB = (): Usuario | null => {
-    const usuariosJSON = localStorage.getItem("usuarios");
-    const usuarios: Usuario[] = usuariosJSON ? JSON.parse(usuariosJSON) : [];
-
-    const usuarioActualRaw = localStorage.getItem("usuarioActual");
-    if (!usuarioActualRaw) return null;
-
-    // usuarioActual puede ser "username" o un JSON stringificado del objeto usuario.
-    let usernameActual: string | null = null;
-    try {
-      const parsed = JSON.parse(usuarioActualRaw);
-      if (parsed && typeof parsed === 'object' && parsed.username) usernameActual = parsed.username;
-      else if (typeof parsed === 'string') usernameActual = parsed;
-    } catch {
-      // no es JSON, tratar como username plano
-      usernameActual = usuarioActualRaw;
-    }
-
-    if (!usernameActual) return null;
-    return usuarios.find(u => u.username === usernameActual) || null;
-};
-
-// ----------------------------------------------------------------------
-// --- COMPONENTE PRINCIPAL DE LA TIENDA ---
-// ----------------------------------------------------------------------
 
 const ProductShop: React.FC = () => {
     const location = useLocation();
-    const { productos: todosLosProductos } = useProducts(); // Usar el hook personalizado
+    const { productos: todosLosProductos } = useProducts();
+    const { usuario: usuarioLogueado, loading: loadingUsuario, esDuoc } = useUsuarioActual();
 
     // Calcular el precio máximo usando los productos del hook
     const precioMaximoGlobal = useMemo(() => {
@@ -202,8 +173,18 @@ const ProductShop: React.FC = () => {
 
     // --- RENDERIZADO DEL COMPONENTE ---
 
-    const usuarioLogueado = getUsuarioDB();
-    const esDuoc = !!(usuarioLogueado && usuarioLogueado.descuentoDuoc === true);
+    // Mostrar loading mientras se cargan los datos del usuario
+    if (loadingUsuario) {
+        return (
+            <div className="container py-5" data-bs-theme="dark">
+                <div className="text-center">
+                    <div className="spinner-border text-primary" role="status">
+                        <span className="visually-hidden">Cargando...</span>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="container py-5" data-bs-theme="dark">

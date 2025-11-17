@@ -5,7 +5,7 @@ export type UsuarioPayload = Omit<Usuario, 'id'>;
 //PayLoad concepto usado para el transporte desde un punto a otro de un objeto en este caso omite id porque es
 //autoincrement
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080/api';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,

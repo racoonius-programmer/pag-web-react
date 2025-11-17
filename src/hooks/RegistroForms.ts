@@ -1,6 +1,7 @@
 // src/hooks/useRegistroForm.ts
 import { useState, useMemo, useCallback, useEffect, type ChangeEvent, type FormEvent } from 'react';
-import { useModal } from './Modal'; // Importamos el hook de modal
+import { UsuarioService, type UsuarioPayload } from '../services/usuario.service';
+import type { Usuario } from '../types/User';
 
 // ----------------------------------------------------------------------
 // TIPOS DE DATOS Y CONSTANTES
@@ -197,8 +198,7 @@ export function useRegistroForm(
     // Esta función también actualizará los errores para que se muestren de forma inmediata
     const validateForm = useCallback((data: RegistroFormData): string | null => {
         let errorMessages: string[] = [];
-        let errors: ValidationState = {};
-        const { username, correo, fechaNacimiento, contrasena, confirmarContrasena, direccion, telefono } = data;
+        const { username, correo, fechaNacimiento, contrasena, confirmarContrasena, direccion } = data;
 
         // 1. Username
         if (username.length < 3) errorMessages.push("- Nombre de usuario muy corto.");
@@ -228,9 +228,8 @@ export function useRegistroForm(
         if (!region) errorMessages.push("- Debes seleccionar una región.");
         if (!comuna) errorMessages.push("- Debes seleccionar una comuna.");
         
-        // Si hay errores, forzamos la actualización de validationMessages para que el usuario los vea.
+        // Si hay errores, retorna el mensaje concatenado
         if (errorMessages.length > 0) {
-             // Aquí por simplicidad en el submit, usamos el listado de errorMessages.
             return `Por favor, corrija los siguientes errores:\n${errorMessages.join('\n')}`;
         }
 
@@ -238,7 +237,7 @@ export function useRegistroForm(
     }, [today, region, comuna]);
 
     // --- Función de Submit (Registro) ---
-    const handleRegistroSubmit = useCallback((e: FormEvent<HTMLFormElement>) => {
+    const handleRegistroSubmit = useCallback(async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
         // 3. Forzar el estado 'touched' al intentar submit para mostrar todos los errores
@@ -251,74 +250,74 @@ export function useRegistroForm(
         }
 
         // -------------------------------------------------------
-        // LÓGICA DE REGISTRO (Almacenamiento en localStorage)
+        // LÓGICA DE REGISTRO (Usando API)
         // -------------------------------------------------------
 
-        const { username, correo, fechaNacimiento, contrasena, telefono, direccion } = formData;
-        const telefonoSinFormato = telefono.replace(/\D/g, "");
-        const descuentoDuoc = correo.toLowerCase().includes("@duoc.cl") || correo.toLowerCase().includes("@profesor.duoc.cl");
-        
-        const usuariosGuardados = JSON.parse(localStorage.getItem("usuarios") || "[]") as any[];
-        const usuarioLogueado = JSON.parse(localStorage.getItem("usuarioActual") || "null");
-
-        // 1. Generar ID
-        const siguienteId = usuariosGuardados.length > 0
-            ? Math.max(...usuariosGuardados.map(u => u.id || 0)) + 1
-            : 1;
-
-        // 2. Verificar si el usuario ya existe
-        if (usuariosGuardados.some(u => u.correo === correo)) {
-            if (showModal) {
-                showModal("El correo ya está registrado.", "Error de Registro");
-            }
-            return;
-        }
-
-        // 3. Crear nuevo usuario
-        const nuevoUsuario = {
-            id: siguienteId,
-            username,
-            correo,
-            contrasena,
-            fechaNacimiento,
-            telefono: telefonoSinFormato,
-            direccion,
-            region,
-            comuna,
-            rol: "usuario",
-            descuentoDuoc,
-            fotoPerfil: "img/header/user-logo-generic-white-alt.png"
-        };
-
-        // 4. Guardar y loguear
-        usuariosGuardados.push(nuevoUsuario);
-        localStorage.setItem("usuarios", JSON.stringify(usuariosGuardados));
-        
-    let redirectPath = "/main"; // <-- Cambia a la ruta de React
-
-        if (usuarioLogueado && usuarioLogueado.rol === 'admin') {
-            redirectPath = "/admin";
-        } else {
-            localStorage.setItem("usuarioActual", JSON.stringify(nuevoUsuario));
-        }
-
-        // Mostrar Modal con Callback de Redirección
-        if (showModal) {
-            showModal(
-                "¡Registro exitoso! Serás redirigido a la página principal.",
-                "Registro Exitoso",
-                () => {
-                    // si se pasó navigate desde el componente, usarlo; si no fallback a window.location
-                    if (navigateFn) {
-                        navigateFn(redirectPath);
-                    } else {
-                        window.location.href = redirectPath;
-                    }
+        try {
+            const { username, correo, fechaNacimiento, contrasena, telefono, direccion } = formData;
+            const telefonoSinFormato = telefono.replace(/\D/g, "");
+            const descuentoDuoc = correo.toLowerCase().includes("@duoc.cl") || correo.toLowerCase().includes("@profesor.duoc.cl");
+            
+            // Verificar si el usuario ya existe
+            const usuariosExistentes = await UsuarioService.listar();
+            if (usuariosExistentes.some(u => u.correo === correo)) {
+                if (showModal) {
+                    showModal("El correo ya está registrado.", "Error de Registro");
                 }
-            );
+                return;
+            }
+
+            // Crear nuevo usuario
+            const nuevoUsuarioData: UsuarioPayload = {
+                username,
+                correo,
+                contrasena,
+                fechaNacimiento,
+                telefono: telefonoSinFormato,
+                direccion,
+                region,
+                comuna,
+                rol: "usuario",
+                descuentoDuoc,
+                fotoPerfil: "img/header/user-logo-generic-white-alt.png"
+            };
+
+            const nuevoUsuario = await UsuarioService.crear(nuevoUsuarioData);
+            
+            let redirectPath = "/main";
+
+            // Verificar si hay un admin logueado
+            const usuarioLogueado = JSON.parse(localStorage.getItem("usuarioActual") || "null");
+            if (usuarioLogueado && usuarioLogueado.rol === 'admin') {
+                redirectPath = "/admin";
+            } else {
+                // Loguear al nuevo usuario
+                localStorage.setItem("usuarioActual", JSON.stringify(nuevoUsuario));
+            }
+
+            // Mostrar Modal con Callback de Redirección
+            if (showModal) {
+                showModal(
+                    "¡Registro exitoso! Serás redirigido a la página principal.",
+                    "Registro Exitoso",
+                    () => {
+                        if (navigateFn) {
+                            navigateFn(redirectPath);
+                        } else {
+                            window.location.href = redirectPath;
+                        }
+                    }
+                );
+            }
+
+        } catch (error) {
+            console.error('Error al registrar usuario:', error);
+            if (showModal) {
+                showModal("Error al registrar el usuario. Por favor, inténtalo de nuevo.", "Error de Conexión");
+            }
         }
 
-    }, [formData, validateForm, showModal, region, comuna]);
+    }, [formData, validateForm, showModal, region, comuna, navigateFn]);
 
 
     return {

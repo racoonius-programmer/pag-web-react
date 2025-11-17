@@ -1,71 +1,55 @@
 import React, { useMemo } from 'react';
 import ProductoCard from './ProductCard';
 import type { Product } from '../types/Product';
-// Tipo Usuario (se usa para decidir si aplica descuento DUOC al usuario actual)
-import type { Usuario } from '../types/User'; 
-
-// JSON local que actúa como DB de productos (src/data/productos.json)
-import productosDB from '../data/productos.json';
-
-// Función auxiliar para obtener el usuario actual desde localStorage.
-// - Lee `usuarios` (array) y `usuarioActual` (string o JSON stringificado).
-// - Devuelve el objeto Usuario correspondiente o null si no hay ninguno.
-const getUsuarioDB = (): Usuario | null => {
-    const usuariosJSON = localStorage.getItem("usuarios");
-    const usuarios: Usuario[] = usuariosJSON ? JSON.parse(usuariosJSON) : [];
-
-    const usuarioActualRaw = localStorage.getItem("usuarioActual");
-    if (!usuarioActualRaw) return null;
-
-        // `usuarioActual` puede ser un username (string) o un objeto stringificado.
-        // Intentamos parsearlo: si es un objeto con `username` lo usamos; si parsea a string también lo aceptamos.
-        let usernameActual: string | null = null;
-        try {
-            const parsed = JSON.parse(usuarioActualRaw);
-            if (parsed && typeof parsed === 'object' && parsed.username) usernameActual = parsed.username;
-            else if (typeof parsed === 'string') usernameActual = parsed;
-        } catch {
-            // Si no es JSON parseable, tratamos `usuarioActualRaw` como username plano.
-            usernameActual = usuarioActualRaw;
-        }
-
-    if (!usernameActual) return null;
-    return usuarios.find(u => u.username === usernameActual) || null;
-};
-
+import { useProducts } from '../hooks/UseProducts';
+import { useUsuarioActual } from '../hooks/UseUsuarioActual';
 
 /*
     ProductosDestacados
     - Propósito: mostrar la sección "Lo más vendido" con hasta 3 productos seleccionados aleatoriamente.
     - Uso: componente sin props; importarlo en una página y renderizar <ProductosDestacados />.
-    - Comportamiento: decide si el usuario tiene `descuentoDuoc` leyendo localStorage y pasa
+    - Comportamiento: decide si el usuario tiene `descuentoDuoc` consultando la API y pasa
         esa información a `ProductoCard` vía la prop `esDuoc`.
 */
 
 const ProductosDestacados: React.FC = () => {
+    const { productos: todosLosProductos } = useProducts();
+    const { loading: loadingUsuario, esDuoc } = useUsuarioActual();
     
-    // Obtener usuario actual (memoizado para no leer localStorage en cada render)
-    const usuarioLogueado = useMemo(getUsuarioDB, []);
-    // Determina si aplica descuento DUOC al usuario (booleano)
-    const esDuoc = !!(usuarioLogueado && usuarioLogueado.descuentoDuoc === true);
-    
-    // Selección de 3 productos al azar (se hace una vez al montar)
+    // Selección de 3 productos al azar (se hace una vez cuando cambian los productos)
     const productosSeleccionados = useMemo(() => {
-        const productos: Product[] = productosDB as Product[];
-
         // Si la lista está vacía, no hagas nada
-        if (productos.length === 0) {
+        if (todosLosProductos.length === 0) {
             return [];
         }
         
         // Selección: clona, mezcla aleatoriamente y toma los primeros 3
-        const seleccion = productos
+        const seleccion = todosLosProductos
             .slice()
             .sort(() => 0.5 - Math.random())
             .slice(0, 3);
 
         return seleccion;
-    }, []); // Se ejecuta una sola vez al montar el componente
+    }, [todosLosProductos]); // Se ejecuta cuando cambian los productos
+
+    // Mostrar loading mientras se cargan los datos del usuario
+    if (loadingUsuario) {
+        return (
+            <div data-bs-theme="dark">
+                <br />
+                <h1 style={{ textAlign: 'center', fontWeight: 'bolder', marginTop: '10px' }} className="text-light">
+                    Lo más vendido
+                </h1>
+                <div className="container py-5">
+                    <div className="text-center">
+                        <div className="spinner-border text-primary" role="status">
+                            <span className="visually-hidden">Cargando...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div data-bs-theme="dark">

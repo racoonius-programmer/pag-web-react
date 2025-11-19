@@ -97,3 +97,26 @@ export const ejecutarMigracionAutomatica = async (): Promise<void> => {
         console.error('❌ Error en la migración automática:', error);
     }
 };
+
+/**
+ * Función para verificar la conexión con la API y listar usuarios
+ */
+export const verificarUsuariosEnApi = async (): Promise<void> => {
+    try {
+        console.log('🔍 Verificando usuarios en la API...');
+        const usuarios = await UsuarioService.listar();
+        
+        console.log(`✅ Conexión exitosa! Se encontraron ${usuarios.length} usuarios en la API:`);
+        usuarios.forEach((usuario, index) => {
+            console.log(`${index + 1}. Usuario: ${usuario.username} | Correo: ${usuario.correo} | Rol: ${usuario.rol}`);
+        });
+        
+        if (usuarios.length === 0) {
+            console.log('⚠️ No hay usuarios en la API. Considera ejecutar la migración.');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error al conectar con la API:', error);
+        console.log('💡 Verifica que el servidor esté corriendo y la URL de la API sea correcta.');
+    }
+};

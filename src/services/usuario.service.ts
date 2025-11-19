@@ -5,7 +5,7 @@ export type UsuarioPayload = Omit<Usuario, 'id'>;
 //PayLoad concepto usado para el transporte desde un punto a otro de un objeto en este caso omite id porque es
 //autoincrement
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -39,6 +39,21 @@ export const UsuarioService = {
 
   async eliminar(id: number): Promise<void> {
     await apiClient.delete(`${resource}/${id}`);
+  },
+
+  // Método para autenticar usuario
+  async login(correo: string, contrasena: string): Promise<Usuario | null> {
+    try {
+      // Obtener todos los usuarios y buscar el que coincida
+      const usuarios = await this.listar();
+      const usuario = usuarios.find(
+        u => u.correo === correo && u.contrasena === contrasena
+      );
+      return usuario || null;
+    } catch (error) {
+      console.error('Error en login:', error);
+      return null;
+    }
   }
 };
 

@@ -29,7 +29,8 @@ import React, { useState, useCallback, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Usuario } from '../types/User'; 
 import Modal from '../components/Modal'; 
-import PasswordInput from '../components/PasswordInput'; 
+import PasswordInput from '../components/PasswordInput';
+import { UsuarioService } from '../services/usuario.service';
 
 // ----------------------------------------------------------------------
 // 1. CONSTANTES Y TIPOS
@@ -146,7 +147,7 @@ const UserLogin: React.FC = () => {
     // - Busca el usuario en `localStorage` (simulación de backend).
     // - Si las credenciales coinciden, guarda `usuarioActual` y muestra un modal
     //   de éxito. El modal recibe un callback que redirige según el rol.
-    const handleSubmit = (e: FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         const { correo, contrasena } = formData;
 
@@ -167,38 +168,35 @@ const UserLogin: React.FC = () => {
             return;
         }
 
-        // Obtener usuarios del localStorage (simulación simple de autenticación).
-        const usuariosString = localStorage.getItem('usuarios');
-        const usuarios: Usuario[] = usuariosString ? JSON.parse(usuariosString) : [];
+        try {
+            // Llamar al servicio de autenticación
+            const usuario = await UsuarioService.login(correo, contrasena);
 
-        // Buscar usuario por correo y contraseña.
-        const usuario = usuarios.find(
-            u => u.correo === correo && u.contrasena === contrasena
-        );
+            if (!usuario) {
+                // Credenciales incorrectas: mostrar error
+                mostrarModal('Correo o contraseña incorrectos.', 'Error de Inicio de Sesión');
+                return;
+            }
 
-        if (!usuario) {
-            // Credenciales incorrectas: mostrar error.
-            mostrarModal('Correo o contraseña incorrectos.', 'Error de Inicio de Sesión');
-            return;
+            // Guardar sesión activa en localStorage (clave: 'usuarioActual').
+            localStorage.setItem('usuarioActual', JSON.stringify(usuario));
+
+            // Determinar ruta de redirección según el rol del usuario.
+            const redirectPath = usuario.rol === 'admin' ? '/admin' : '/main';
+            
+            const welcomeMessage = usuario.rol === 'admin'
+                ? `Bienvenido administrador ${usuario.username}!`
+                : `Inicio de sesión exitoso. ¡Hola, ${usuario.username}!`;
+
+            // Mostrar modal de éxito y ejecutar la redirección cuando el modal se oculte.
+            mostrarModal(welcomeMessage, 'Inicio de Sesión Exitoso', () => {
+                navigate(redirectPath); // Ejecutado al cerrar el modal
+            });
+        } catch (error) {
+            // Mostrar error en caso de fallo de conexión con la API
+            console.error('Error al conectar con la API:', error);
+            mostrarModal('Error de conexión. Por favor, verifica que el servidor esté funcionando.', 'Error de Conexión');
         }
-
-        // Guardar sesión activa en localStorage (clave: 'usuarioActual').
-        localStorage.setItem('usuarioActual', JSON.stringify(usuario));
-
-        // Determinar ruta de redirección según el rol del usuario.
-    const redirectPath = usuario.rol === 'admin' ? '/admin' : '/main';
-        
-        const welcomeMessage = usuario.rol === 'admin'
-            ? `Bienvenido administrador ${usuario.username}!`
-            : `Inicio de sesión exitoso. ¡Hola, ${usuario.username}!`;
-
-        // Mostrar modal de éxito y ejecutar la redirección cuando el modal se oculte.
-        mostrarModal(welcomeMessage, 'Inicio de Sesión Exitoso', () => {
-            navigate(redirectPath); // Ejecutado al cerrar el modal
-        });
-        
-        // Finalizar la función
-        return; 
     };
 
     // ----------------------------------------------------------------------

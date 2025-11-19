@@ -30,8 +30,8 @@ import { useUsuarioActual } from '../hooks/UseUsuarioActual';
 
 const ProductShop: React.FC = () => {
     const location = useLocation();
-    const { productos: todosLosProductos } = useProducts();
-    const { usuario: usuarioLogueado, loading: loadingUsuario, esDuoc } = useUsuarioActual();
+    const { productos: todosLosProductos, loading: loadingProductos, error: errorProductos } = useProducts();
+    const { loading: loadingUsuario, esDuoc } = useUsuarioActual();
 
     // Calcular el precio máximo usando los productos del hook
     const precioMaximoGlobal = useMemo(() => {
@@ -173,13 +173,36 @@ const ProductShop: React.FC = () => {
 
     // --- RENDERIZADO DEL COMPONENTE ---
 
-    // Mostrar loading mientras se cargan los datos del usuario
-    if (loadingUsuario) {
+    // Mostrar loading mientras se cargan los datos
+    if (loadingUsuario || loadingProductos) {
         return (
             <div className="container py-5" data-bs-theme="dark">
                 <div className="text-center">
                     <div className="spinner-border text-primary" role="status">
                         <span className="visually-hidden">Cargando...</span>
+                    </div>
+                    <p className="text-light mt-3">
+                        {loadingUsuario && loadingProductos ? 'Cargando tienda...' : 
+                         loadingUsuario ? 'Verificando usuario...' : 'Cargando productos...'}
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    // Mostrar error si hay problemas cargando productos
+    if (errorProductos) {
+        return (
+            <div className="container py-5" data-bs-theme="dark">
+                <div className="text-center">
+                    <div className="alert alert-danger" role="alert">
+                        <i className="bi bi-exclamation-triangle fs-1 d-block mb-3"></i>
+                        <h4>Error al cargar productos</h4>
+                        <p>{errorProductos}</p>
+                        <p>Por favor, verifica tu conexión a internet y que el servidor esté funcionando.</p>
+                        <button className="btn btn-primary" onClick={() => window.location.reload()}>
+                            Reintentar
+                        </button>
                     </div>
                 </div>
             </div>
@@ -328,13 +351,18 @@ const ProductShop: React.FC = () => {
                             <div className="text-center text-light py-5">
                                 <i className="bi bi-inbox fs-1 d-block mb-3"></i>
                                 <p>
-                                    {terminoBusqueda 
-                                        ? `No se encontraron productos para "${terminoBusqueda}".` 
-                                        : 'No se encontraron productos con los filtros seleccionados.'}
+                                    {todosLosProductos.length === 0 
+                                        ? 'No hay productos disponibles en la tienda. Los administradores pueden agregar productos desde el panel administrativo.'
+                                        : terminoBusqueda 
+                                            ? `No se encontraron productos para "${terminoBusqueda}".` 
+                                            : 'No se encontraron productos con los filtros seleccionados.'
+                                    }
                                 </p>
-                                <button className="btn btn-outline-light" onClick={handleLimpiarFiltros}>
-                                    Limpiar filtros
-                                </button>
+                                {todosLosProductos.length > 0 && (
+                                    <button className="btn btn-outline-light" onClick={handleLimpiarFiltros}>
+                                        Limpiar filtros
+                                    </button>
+                                )}
                             </div>
                         )}
                     </div>

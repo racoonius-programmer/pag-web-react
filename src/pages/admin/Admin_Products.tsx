@@ -120,14 +120,21 @@ const Admin_Products: React.FC = () => {
     };
 
     // Clonar producto: usa cloneProduct del hook y muestra un modal con el resultado
-    const handleCloneProduct = (codigo: string) => {
-        const cloned = cloneProduct(codigo);
-        if (cloned) {
-            showModal(
-                `Producto "${cloned.nombre}" clonado exitosamente con código "${cloned.codigo}"`,
-                'Producto Clonado'
-            );
-        } else {
+    // IMPORTANTE: `cloneProduct` es async (devuelve una Promise), por lo que aquí
+    // debemos usar `await` para obtener el producto clonado antes de acceder a sus props.
+    const handleCloneProduct = async (codigo: string) => {
+        try {
+            const cloned = await cloneProduct(codigo);
+            if (cloned) {
+                showModal(
+                    `Producto "${cloned.nombre}" clonado exitosamente con código "${cloned.codigo}"`,
+                    'Producto Clonado'
+                );
+            } else {
+                showModal('Error al clonar el producto. Por favor, intenta nuevamente.', 'Error');
+            }
+        } catch (error) {
+            console.error('Error al clonar producto:', error);
             showModal('Error al clonar el producto. Por favor, intenta nuevamente.', 'Error');
         }
     };
@@ -150,22 +157,29 @@ const Admin_Products: React.FC = () => {
     };
 
     // Maneja el submit del ProductFormModal (agregar o editar según modalMode)
-    const handleModalSubmit = (productData: Omit<Product, 'codigo'>) => {
-        if (modalMode === 'add') {
-            const newProduct = addProduct(productData);
-            showModal(
-                `Producto "${newProduct.nombre}" agregado exitosamente con código "${newProduct.codigo}"`,
-                'Producto Agregado'
-            );
-        } else if (modalMode === 'edit' && productToEdit) {
-            updateProduct(productToEdit.codigo, productData);
-            showModal(
-                `Producto "${productData.nombre}" actualizado exitosamente`,
-                'Producto Actualizado'
-            );
-            if (selectedProduct && selectedProduct.codigo === productToEdit.codigo) {
-                setSelectedProduct({ ...productToEdit, ...productData });
+    // `addProduct` y `updateProduct` son async, usamos await para garantizar
+    // que la operación finalizó antes de mostrar feedback al usuario.
+    const handleModalSubmit = async (productData: Omit<Product, 'codigo'>) => {
+        try {
+            if (modalMode === 'add') {
+                const newProduct = await addProduct(productData);
+                showModal(
+                    `Producto "${newProduct.nombre}" agregado exitosamente con código "${newProduct.codigo}"`,
+                    'Producto Agregado'
+                );
+            } else if (modalMode === 'edit' && productToEdit) {
+                await updateProduct(productToEdit.codigo, productData);
+                showModal(
+                    `Producto "${productData.nombre}" actualizado exitosamente`,
+                    'Producto Actualizado'
+                );
+                if (selectedProduct && selectedProduct.codigo === productToEdit.codigo) {
+                    setSelectedProduct({ ...productToEdit, ...productData });
+                }
             }
+        } catch (error) {
+            console.error('Error en operación de producto:', error);
+            showModal('Ocurrió un error al guardar el producto. Intenta nuevamente.', 'Error');
         }
     };
 

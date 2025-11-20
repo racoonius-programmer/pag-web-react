@@ -27,7 +27,6 @@
 
 import React, { useState, useCallback, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { Usuario } from '../types/User'; 
 import Modal from '../components/Modal'; 
 import PasswordInput from '../components/PasswordInput';
 import { UsuarioService } from '../services/usuario.service';

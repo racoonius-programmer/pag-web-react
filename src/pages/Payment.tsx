@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useCartContext } from '../hooks/UseCart';
 import { useNavigate } from 'react-router-dom';
 import type { Usuario } from '../types/User';
+import useOrders from '../hooks/UseOrders';
+import type { PedidoProducto } from '../types/Pedido';
 
 /*
 	Página: Payment
@@ -27,6 +29,9 @@ const Payment: React.FC = () => {
 
 	// `navigate` se usa para redirigir a otras rutas (login, carrito, productos, inicio).
 	const navigate = useNavigate();
+
+	// Hook para crear pedidos vía API
+	const { createOrder } = useOrders();
 
 	// Efecto: al cambiar `totalAmount` recalculamos puntos y cargamos el usuario desde localStorage.
 	useEffect(() => {
@@ -55,7 +60,7 @@ const Payment: React.FC = () => {
 			que incluye usuario, dirección y puntos ganados.
 		- No realiza llamadas a un backend real
 	*/
-	const procesarPago = () => {
+	const procesarPago = async () => {
 		if (!usuario) {
 			// Si no hay usuario, mostramos mensaje y redirigimos al login en 2s.
 			setMensaje('Debes iniciar sesión para completar tu compra.');
@@ -69,24 +74,68 @@ const Payment: React.FC = () => {
 			return;
 		}
 
-		// Sumamos puntos al usuario en localStorage (clave: 'puntosLevelUp').
-		let puntosActuales = parseInt(localStorage.getItem('puntosLevelUp') || '0', 10);
-		puntosActuales += puntosGanados;
-		localStorage.setItem('puntosLevelUp', puntosActuales.toString());
 
-		// Vaciar el carrito mediante la función del contexto.
-		clearCart();
+		// Construir payload de pedido para enviar a la API
+		const productosPayload: PedidoProducto[] = cart.map(item => ({
+			codigo: item.codigo,
+			nombre: item.nombre,
+			cantidad: Number(item.cantidad), // Asegurar que sea número
+			precio: Number(item.precio) // Asegurar que sea número
+		}));
 
-		// Generar un código de envío aleatorio para mostrar al usuario.
-		const codigoEnvio = Math.floor(100000 + Math.random() * 900000);
-
-		// Construir el mensaje final (usamos `whiteSpace: 'pre-line'` en el alert para respetar saltos de línea).
-		setMensaje(
-			`✅ ¡Pago realizado con éxito, ${usuario.username}!\n` +
-			`Tu pedido será enviado a la dirección: ${usuario.direccion || 'Dirección no registrada.'}.\n` +
-			`Código de envío: #${codigoEnvio}.\n\n` +
-			`Ganaste ${puntosGanados} puntos. Ahora tienes un total de ${puntosActuales} puntos Level Up.`
+		// Validar que todos los productos tengan datos válidos
+		const productosValidos = productosPayload.every(producto => 
+			producto.codigo && 
+			producto.cantidad > 0 && 
+			producto.precio > 0 &&
+			!isNaN(producto.cantidad) &&
+			!isNaN(producto.precio)
 		);
+
+		if (!productosValidos) {
+			setMensaje('Error: Algunos productos del carrito tienen datos inválidos.');
+			return;
+		}
+
+		const pedidoPayload = {
+			clienteId: Number(usuario.id), // Asegurar que sea número
+			productos: productosPayload,
+			estado: 'en preparacion' as const,
+			// opcionales: direccion, notas
+			direccion: usuario.direccion || undefined, // Evitar strings vacíos
+		};
+
+		try {
+			// DEBUG: mostrar en consola lo que se está enviando
+			// eslint-disable-next-line no-console
+			console.log('[Payment] enviando pedidoPayload ->', pedidoPayload);
+			const nuevoPedido = await createOrder(pedidoPayload as any);
+			// eslint-disable-next-line no-console
+			console.log('[Payment] respuesta createOrder ->', nuevoPedido);
+
+			// Solo vaciamos el carrito tras confirmación del servidor
+			let puntosActuales = parseInt(localStorage.getItem('puntosLevelUp') || '0', 10);
+			puntosActuales += puntosGanados;
+			localStorage.setItem('puntosLevelUp', puntosActuales.toString());
+			clearCart();
+
+			const codigoEnvio = Math.floor(100000 + Math.random() * 900000);
+
+			setMensaje(
+				`✅ ¡Pago realizado con éxito, ${usuario.username}!\n` +
+				`Pedido creado (ID: ${nuevoPedido.id}).\n` +
+				`Tu pedido será enviado a la dirección: ${usuario.direccion || 'Dirección no registrada.'}.\n` +
+				`Código de envío: #${codigoEnvio}.\n\n` +
+				`Ganaste ${puntosGanados} puntos. Ahora tienes un total de ${puntosActuales} puntos Level Up.`
+			);
+
+			// Redirigir al usuario a su historial de pedidos para que vea el pedido recién creado.
+			// Hacemos una pequeña espera para que el mensaje pueda mostrarse brevemente.
+			setTimeout(() => navigate('/pedidos', { state: { fromPayment: true } }), 1400);
+		} catch (error) {
+			console.error('Error al crear pedido en la API:', error);
+			setMensaje('Ocurrió un error al procesar el pago. Por favor intenta nuevamente.');
+		}
 	};
 
 	// JSX: resumen y acciones disponibles para el usuario.

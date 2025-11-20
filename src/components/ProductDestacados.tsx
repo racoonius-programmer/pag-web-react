@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import ProductoCard from './ProductCard';
-import type { Product } from '../types/Product';
 import { useProducts } from '../hooks/UseProducts';
 import { useUsuarioActual } from '../hooks/UseUsuarioActual';
 

@@ -250,6 +250,13 @@ const Admin_Dashboard: React.FC = () => {
                                             </h4>
                                         </div>
                                     </div>
+                                    {/* Enlace rápido a la gestión de pedidos (Admin) */}
+                                    <div className="mt-4 text-center">
+                                        {/* Comentario: botón que lleva a la ruta /admin/orders para revisar pedidos */}
+                                        <a href="/admin/orders" className="btn btn-outline-primary">
+                                            Ir a Gestión de Pedidos
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>

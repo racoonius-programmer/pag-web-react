@@ -185,6 +185,8 @@ const Header: React.FC = () => {
                                 <li><span className="dropdown-item-text">Level-Up: Nivel 1</span></li>
                                 <li><Link className="dropdown-item" to="/perfil">Mi Perfil</Link></li>
                                 <li><Link className="dropdown-item" to="/carrito">Mi Carrito</Link></li>
+                                {/* Enlace para que el cliente vea su historial de pedidos */}
+                                <li><Link className="dropdown-item" to="/pedidos">Mis Pedidos</Link></li>
                                 {usuarioActual.rol === "admin" && (
                                     <li><Link className="dropdown-item" to="/admin">Panel de Administración</Link></li>
                                 )}

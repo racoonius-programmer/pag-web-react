@@ -1,7 +1,6 @@
 // src/hooks/useRegistroForm.ts
 import { useState, useMemo, useCallback, useEffect, type ChangeEvent, type FormEvent } from 'react';
 import { UsuarioService, type UsuarioPayload } from '../services/usuario.service';
-import type { Usuario } from '../types/User';
 
 // ----------------------------------------------------------------------
 // TIPOS DE DATOS Y CONSTANTES

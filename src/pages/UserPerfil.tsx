@@ -50,7 +50,6 @@ const UserPerfil: React.FC = () => {
     // Hook para regiones y comunas: devuelve opciones y handlers para seleccionar.
     // Se inicia sin selección ('','') ya que cargaremos la selección desde localStorage.
     const {
-        regionesOptions,
         comunasOptions,
         selectedRegion,
         selectedComuna,

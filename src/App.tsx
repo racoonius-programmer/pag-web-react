@@ -26,6 +26,8 @@ import Admin_Dashboard from './pages/admin/Admin_Dashboard';
 import Admin_Users from './pages/admin/Admin_Users';
 import Admin_Products from './pages/admin/Admin_Products';
 import Admin_Reload from "./pages/Admin_Reload";
+import OrdersPage from './pages/Orders';
+import Admin_Orders from './pages/admin/Admin_Orders';
 
 const App: React.FC = () => {
   return (
@@ -49,6 +51,7 @@ const App: React.FC = () => {
               <Route index element={<Admin_Dashboard />} />
               <Route path="users" element={<Admin_Users />} />
               <Route path="products" element={<Admin_Products />} />
+              <Route path="orders" element={<Admin_Orders />} />
             </Route>
 
             {/* 🔹 Secciones informativas */}
@@ -69,6 +72,7 @@ const App: React.FC = () => {
             <Route path="/carrito" element={<ProductoCarrito />} />
             <Route path="/payment" element={<Payment />} />
             <Route path="/perfil" element={<UserPerfil />} />
+            <Route path="/pedidos" element={<OrdersPage />} />
 
             {/* 🔹 RUTA 404 */}
             <Route

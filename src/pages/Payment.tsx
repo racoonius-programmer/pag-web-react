@@ -79,16 +79,30 @@ const Payment: React.FC = () => {
 		const productosPayload: PedidoProducto[] = cart.map(item => ({
 			codigo: item.codigo,
 			nombre: item.nombre,
-			cantidad: item.cantidad,
-			precio: item.precio
+			cantidad: Number(item.cantidad), // Asegurar que sea número
+			precio: Number(item.precio) // Asegurar que sea número
 		}));
 
+		// Validar que todos los productos tengan datos válidos
+		const productosValidos = productosPayload.every(producto => 
+			producto.codigo && 
+			producto.cantidad > 0 && 
+			producto.precio > 0 &&
+			!isNaN(producto.cantidad) &&
+			!isNaN(producto.precio)
+		);
+
+		if (!productosValidos) {
+			setMensaje('Error: Algunos productos del carrito tienen datos inválidos.');
+			return;
+		}
+
 		const pedidoPayload = {
-			clienteId: usuario.id,
+			clienteId: Number(usuario.id), // Asegurar que sea número
 			productos: productosPayload,
 			estado: 'en preparacion' as const,
 			// opcionales: direccion, notas
-			direccion: usuario.direccion,
+			direccion: usuario.direccion || undefined, // Evitar strings vacíos
 		};
 
 		try {

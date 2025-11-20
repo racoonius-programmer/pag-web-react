@@ -95,6 +95,19 @@ const Admin_Layout: React.FC = () => {
                             </button>
                         </li>
 
+                        {/* Orders Manager */}
+                        <li className="nav-item">
+                            <button
+                                className={`nav-link text-start w-100 border-0 ${
+                                    isActive('/admin/orders') ? 'bg-primary' : 'bg-transparent'
+                                } text-white`}
+                                onClick={() => handleNavigation('/admin/orders')}
+                            >
+                                <i className="bi bi-receipt me-2"></i>
+                                {!sidebarCollapsed && 'Orders Manager'}
+                            </button>
+                        </li>
+
                         {/* Divider visual */}
                         <li className="nav-item">
                             <hr className="text-secondary mx-3" />

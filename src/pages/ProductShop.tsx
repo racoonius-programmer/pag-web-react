@@ -344,7 +344,7 @@ const ProductShop: React.FC = () => {
                         {productos.length > 0 ? (
                             productos.map(producto => (
                                 <div className="col-12 col-sm-6 col-md-4 mb-4 d-flex align-items-stretch" key={producto.codigo}>
-                                    <ProductoCard producto={producto} esDuoc={esDuoc} />
+                                    <ProductoCard producto={producto} esDuoc={esDuoc} fixed={true} />
                                 </div>
                             ))
                         ) : (

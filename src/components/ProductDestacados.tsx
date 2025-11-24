@@ -62,7 +62,7 @@ const ProductosDestacados: React.FC = () => {
                         {productosSeleccionados.map(producto => (
                             <div style={{ minWidth: '320px', scrollSnapAlign:'start', margin: '0 auto' }} key={producto.codigo}>
                                 {/* Pasar la prop 'esDuoc' al ProductoCard para que aplique el descuento si aplica */}
-                                <ProductoCard producto={producto} esDuoc={esDuoc} /> 
+                                <ProductoCard producto={producto} esDuoc={esDuoc} fixed={true} /> 
                             </div>
                         ))}
                     </div>

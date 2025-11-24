@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 // Layout
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 // Páginas
 import MainScreen from "./pages/Inicio";
@@ -45,9 +46,17 @@ const App: React.FC = () => {
             <Route path="/" element={<MainScreen />} />
             <Route path="/main" element={<MainScreen />} />
 
-            {/* Admin*/}
-            <Route path="/admin_main" element={<Admin_Reload/>} />
-            <Route path="/admin" element={<Admin_Layout />}>
+            {/* Admin - Protegidas con ProtectedRoute */}
+            <Route path="/admin_main" element={
+              <ProtectedRoute requireAdmin>
+                <Admin_Reload/>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin" element={
+              <ProtectedRoute requireAdmin>
+                <Admin_Layout />
+              </ProtectedRoute>
+            }>
               <Route index element={<Admin_Dashboard />} />
               <Route path="users" element={<Admin_Users />} />
               <Route path="products" element={<Admin_Products />} />

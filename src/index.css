@@ -347,6 +347,98 @@ main {
 /* ESTILOS PARA PÁGINAS DE PEDIDOS   */
 /* ---------------------------------- */
 
+/* ---------------------------------- */
+/* ESTILOS PARA DASHBOARD ADMIN STICKY */
+/* ---------------------------------- */
+
+/* Contenedor del dashboard administrativo con comportamiento sticky */
+.admin-dashboard-container {
+  position: sticky;
+  top: 20px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  padding: 1rem;
+  box-sizing: border-box;
+  background: rgba(18, 18, 18, 0.95);
+  border-radius: 0.5rem;
+}
+
+/* Componente StickyContainer reutilizable */
+.sticky-dashboard-container {
+  position: sticky;
+  top: 20px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  padding: 1rem;
+  box-sizing: border-box;
+  background: rgba(18, 18, 18, 0.95);
+  border-radius: 0.5rem;
+}
+
+/* Contenedor para páginas de admin - sin sticky para evitar conflictos */
+.admin-content-container {
+  padding: 1rem;
+  box-sizing: border-box;
+  background: rgba(18, 18, 18, 0.95);
+  border-radius: 0.5rem;
+  width: 100%;
+}
+
+/* Ajustes para que las tarjetas del dashboard mantengan su espaciado */
+.admin-dashboard-container .row,
+.sticky-dashboard-container .row,
+.admin-content-container .row {
+  margin: 0;
+}
+
+.admin-dashboard-container .card,
+.sticky-dashboard-container .card,
+.admin-content-container .card {
+  margin-bottom: 1rem;
+  background-color: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 8px;
+}
+
+/* Scrollbar personalizado para el dashboard */
+.admin-dashboard-container::-webkit-scrollbar,
+.sticky-dashboard-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.admin-dashboard-container::-webkit-scrollbar-track,
+.sticky-dashboard-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.admin-dashboard-container::-webkit-scrollbar-thumb,
+.sticky-dashboard-container::-webkit-scrollbar-thumb {
+  background: rgba(30, 144, 255, 0.6);
+  border-radius: 4px;
+}
+
+.admin-dashboard-container::-webkit-scrollbar-thumb:hover,
+.sticky-dashboard-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(30, 144, 255, 0.8);
+}
+
+/* Forzar color blanco en labels de formularios de administración */
+.admin-form-label {
+  color: #ffffff !important;
+  font-weight: 500 !important;
+}
+
+/* Responsive: en pantallas pequeñas, desactivar sticky */
+@media (max-width: 768px) {
+  .admin-dashboard-container,
+  .sticky-dashboard-container {
+    position: static;
+    max-height: none;
+    overflow-y: visible;
+  }
+}
+
 /* Contenedor principal de pedidos */
 .orders-container {
   background-color: #121212;

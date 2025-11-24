@@ -88,7 +88,7 @@ const OrderCard: React.FC<Props> = ({ pedido, isAdmin = false, onUpdateStatus })
         {/* Información del cliente (solo para admin) */}
         {isAdmin && (
           <div className="mb-3">
-            <small className="text-muted">
+            <small className="text-white">
               <i className="bi bi-person-fill me-1"></i>
               Cliente ID: {pedido.clienteId}
             </small>

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import type { Usuario } from '../../types/User';
 import { useProducts } from '../../hooks/UseProducts';
 import { UsuarioService } from '../../services/usuario.service';
+import StickyContainer from '../../components/StickyContainer';
 
 /*
   Admin_Dashboard
@@ -75,7 +76,7 @@ const Admin_Dashboard: React.FC = () => {
     // La UI está compuesta por tarjetas (cards) de Bootstrap que consumen las funciones
     // anteriores para mostrar los números. Intentamos evitar lógica pesada dentro del JSX.
     return (
-        <div className="p-4">
+        <StickyContainer>
             <div className="row g-4">
                 <div className="col-12">
                     <h1 className="text-white mb-4">Dashboard de Administración</h1>
@@ -113,7 +114,7 @@ const Admin_Dashboard: React.FC = () => {
                                 <div className="card-body">
                                     <div className="d-flex justify-content-between">
                                         <div>
-                                            <h6 className="card-title">Total Productos</h6>
+                                            <h6 className="card-title text-white">Total Productos</h6>
                                             <h2 className="mb-0">{getTotalProducts()}</h2>
                                         </div>
                                         <div className="align-self-center">
@@ -129,7 +130,7 @@ const Admin_Dashboard: React.FC = () => {
                                 <div className="card-body">
                                     <div className="d-flex justify-content-between">
                                         <div>
-                                            <h6 className="card-title">Usuarios DUOC</h6>
+                                            <h6 className="card-title text-white">Usuarios DUOC</h6>
                                             <h2 className="mb-0">{getDuocUsers()}</h2>
                                         </div>
                                         <div className="align-self-center">
@@ -145,7 +146,7 @@ const Admin_Dashboard: React.FC = () => {
                                 <div className="card-body">
                                     <div className="d-flex justify-content-between">
                                         <div>
-                                            <h6 className="card-title">Administradores</h6>
+                                            <h6 className="card-title text-white">Administradores</h6>
                                             <h2 className="mb-0">{getAdminUsers()}</h2>
                                         </div>
                                         <div className="align-self-center">
@@ -225,17 +226,17 @@ const Admin_Dashboard: React.FC = () => {
                                 <div className="card-body">
                                     <div className="row text-center">
                                         <div className="col-md-3">
-                                            <p className="mb-1 text-muted">Porcentaje DUOC</p>
+                                            <p className="mb-1 text-white">Porcentaje DUOC</p>
                                             <h4 className="text-info">
                                                 {getTotalUsers() > 0 ? Math.round((getDuocUsers() / getTotalUsers()) * 100) : 0}%
                                             </h4>
                                         </div>
                                         <div className="col-md-3">
-                                            <p className="mb-1 text-muted">Categorías activas</p>
+                                            <p className="mb-1 text-white">Categorías activas</p>
                                             <h4 className="text-success">{Object.keys(categoriesData).length}</h4>
                                         </div>
                                         <div className="col-md-3">
-                                            <p className="mb-1 text-muted">Precio promedio</p>
+                                            <p className="mb-1 text-white">Precio promedio</p>
                                             <h4 className="text-warning">
                                                 ${productos.length > 0 ? 
                                                     Math.round(productos.reduce((sum, p) => sum + p.precio, 0) / productos.length).toLocaleString('es-ES') 
@@ -244,7 +245,7 @@ const Admin_Dashboard: React.FC = () => {
                                             </h4>
                                         </div>
                                         <div className="col-md-3">
-                                            <p className="mb-1 text-muted">Admin/User ratio</p>
+                                            <p className="mb-1 text-white">Admin/User ratio</p>
                                             <h4 className="text-danger">
                                                 {getTotalUsers() > 0 ? Math.round((getAdminUsers() / getTotalUsers()) * 100) : 0}%
                                             </h4>
@@ -263,7 +264,7 @@ const Admin_Dashboard: React.FC = () => {
                     </>
                 )}
             </div>
-        </div>
+        </StickyContainer>
     );
 };
 

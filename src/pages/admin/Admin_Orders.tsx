@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import useOrders from '../../hooks/UseOrders';
 import OrderCard from '../../components/OrderCard';
+import StickyContainer from '../../components/StickyContainer';
 
 /**
  * Vista de administración para revisar pedidos.
@@ -42,18 +43,6 @@ const AdminOrders: React.FC = () => {
     setPedidosFiltrados(filtrados);
   }, [pedidos, clienteIdFiltro, estadoFiltro]);
 
-  // POLLING DESHABILITADO: Para evitar consultas innecesarias a la BD
-  // Los pedidos se actualizan solo con el botón "Refrescar" o al cargar la página
-  // useEffect(() => {
-  //   const intervalo = setInterval(async () => {
-  //     try {
-  //       await loadAll();
-  //     } catch (err) {
-  //       console.error('[AdminOrders] error en polling:', err);
-  //     }
-  //   }, 10000);
-  //   return () => clearInterval(intervalo);
-  // }, []);
 
   const handleRefrescar = async () => {
     await loadAll();
@@ -81,7 +70,7 @@ const AdminOrders: React.FC = () => {
   const totalVentas = pedidos.reduce((sum, pedido) => sum + (pedido.total || 0), 0);
 
   return (
-    <div className="container py-4">
+    <StickyContainer>
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h3 className="text-white mb-0">Administración de Pedidos</h3>
         <button 
@@ -105,9 +94,9 @@ const AdminOrders: React.FC = () => {
           </div>
         </div>
         <div className="col-md-3">
-          <div className="card bg-warning text-dark">
+          <div className="card bg-warning text-white">
             <div className="card-body">
-              <h5 className="card-title">En Preparación</h5>
+              <h5 className="card-title text-white">En Preparación</h5>
               <h3>{pedidosEnPreparacion}</h3>
             </div>
           </div>
@@ -123,7 +112,7 @@ const AdminOrders: React.FC = () => {
         <div className="col-md-3">
           <div className="card bg-info text-white">
             <div className="card-body">
-              <h5 className="card-title">Total Ventas</h5>
+              <h5 className="card-title text-white">Total Ventas</h5>
               <h3>${totalVentas.toLocaleString('es-ES')}</h3>
             </div>
           </div>
@@ -138,7 +127,7 @@ const AdminOrders: React.FC = () => {
         <div className="card-body">
           <div className="row">
             <div className="col-md-4">
-              <label className="form-label text-white">Cliente ID</label>
+              <label className="form-label admin-form-label">Cliente ID</label>
               <input
                 className="form-control"
                 placeholder="Ej: 1, 2, 3..."
@@ -147,7 +136,7 @@ const AdminOrders: React.FC = () => {
               />
             </div>
             <div className="col-md-4">
-              <label className="form-label text-white">Estado</label>
+              <label className="form-label admin-form-label">Estado</label>
               <select 
                 className="form-select"
                 value={estadoFiltro}
@@ -202,7 +191,7 @@ const AdminOrders: React.FC = () => {
           ))}
         </div>
       )}
-    </div>
+    </StickyContainer>
   );
 };
 

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Usuario } from '../../types/User';
 import { UsuarioService, type UsuarioPayload } from '../../services/usuario.service';
+import StickyContainer from '../../components/StickyContainer';
 
 /*
   Funcionalidad principal:
@@ -158,7 +159,7 @@ const Admin_Users: React.FC = () => {
     // - columna derecha: detalles del usuario seleccionado
     // -----------------
     return (
-        <div className="p-4">
+        <StickyContainer>
             <div className="row g-4">
                 <div className="col-12">
                     <div className="d-flex justify-content-between align-items-center mb-4">
@@ -304,7 +305,7 @@ const Admin_Users: React.FC = () => {
                                             </tbody>
                                         </table>
                                         {filteredUsers.length === 0 && (
-                                            <div className="text-center text-muted py-4">
+                                            <div className="text-center text-white py-4">
                                                 No se encontraron usuarios que coincidan con los filtros.
                                             </div>
                                         )}
@@ -392,7 +393,7 @@ const Admin_Users: React.FC = () => {
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="text-center text-muted py-5">
+                                        <div className="text-center text-white py-5">
                                             <i className="bi bi-person-circle fs-1 d-block mb-3"></i>
                                             <p>Selecciona un usuario para ver sus detalles</p>
                                         </div>
@@ -403,7 +404,7 @@ const Admin_Users: React.FC = () => {
                     </>
                 )}
             </div>
-        </div>
+        </StickyContainer>
     );
 };
 

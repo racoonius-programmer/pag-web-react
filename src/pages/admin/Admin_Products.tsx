@@ -5,6 +5,7 @@ import { useProducts } from '../../hooks/UseProducts';
 import ProductFormModal from '../../components/ProductFormModal';
 import Modal from '../../components/Modal';
 import { useModal } from '../../hooks/Modal';
+import StickyContainer from '../../components/StickyContainer';
 
 /*
   Admin_Products
@@ -186,7 +187,7 @@ const Admin_Products: React.FC = () => {
     const stats = getProductStats();
 
     return (
-        <div className="p-4">
+        <StickyContainer>
             <div className="row g-4">
                 <div className="col-12">
                     <div className="d-flex justify-content-between align-items-center mb-4">
@@ -208,36 +209,36 @@ const Admin_Products: React.FC = () => {
 
                 {/* Estadísticas rápidas */}
                 <div className="col-12">
-                    <div className="row g-3 mb-4">
-                        <div className="col-md-2">
-                            <div className="card bg-primary text-white text-center">
-                                <div className="card-body py-2">
-                                    <h6 className="mb-0">Total</h6>
-                                    <h4 className="mb-0">{stats.total}</h4>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="col-md-2">
-                            <div className="card bg-info text-white text-center">
-                                <div className="card-body py-2">
-                                    <h6 className="mb-0">Categorías</h6>
-                                    <h4 className="mb-0">{stats.categories}</h4>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="col-md-2">
-                            <div className="card bg-success text-white text-center">
-                                <div className="card-body py-2">
-                                    <h6 className="mb-0">Precio Promedio</h6>
-                                    <small className="mb-0">${stats.avgPrice.toLocaleString('es-ES')}</small>
+                    <div className="row mb-4">
+                        <div className="col-md-3">
+                            <div className="card bg-primary text-white">
+                                <div className="card-body">
+                                    <h5 className="card-title">Total Productos</h5>
+                                    <h3>{stats.total}</h3>
                                 </div>
                             </div>
                         </div>
                         <div className="col-md-3">
-                            <div className="card bg-warning text-white text-center">
-                                <div className="card-body py-2">
-                                    <h6 className="mb-0">Rango de Precios</h6>
-                                    <small className="mb-0">${stats.minPrice.toLocaleString('es-ES')} - ${stats.maxPrice.toLocaleString('es-ES')}</small>
+                            <div className="card bg-info text-white">
+                                <div className="card-body">
+                                    <h5 className="card-title">Categorías</h5>
+                                    <h3>{stats.categories}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="col-md-3">
+                            <div className="card bg-success text-white">
+                                <div className="card-body">
+                                    <h5 className="card-title">Precio Promedio</h5>
+                                    <h3>${stats.avgPrice.toLocaleString('es-ES')}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="col-md-3">
+                            <div className="card bg-warning text-white">
+                                <div className="card-body">
+                                    <h5 className="card-title text-white">Rango de Precios</h5>
+                                    <h3>${stats.minPrice.toLocaleString('es-ES')} - ${stats.maxPrice.toLocaleString('es-ES')}</h3>
                                 </div>
                             </div>
                         </div>
@@ -373,7 +374,7 @@ const Admin_Products: React.FC = () => {
                                     </tbody>
                                 </table>
                                 {filteredProducts.length === 0 && (
-                                    <div className="text-center text-muted py-4">
+                                    <div className="text-center text-white py-4">
                                         No se encontraron productos que coincidan con los filtros.
                                     </div>
                                 )}
@@ -437,7 +438,7 @@ const Admin_Products: React.FC = () => {
                                         {selectedProduct.Descripcion && (
                                             <div className="col-12">
                                                 <strong>Descripción:</strong>
-                                                <p className="text-muted mt-1 small">{selectedProduct.Descripcion}</p>
+                                                <p className="text-white mt-1 small">{selectedProduct.Descripcion}</p>
                                             </div>
                                         )}
                                     </div>
@@ -473,7 +474,7 @@ const Admin_Products: React.FC = () => {
                                     </div>
                                 </div>
                             ) : (
-                                <div className="text-center text-muted py-5">
+                                <div className="text-center text-white py-5">
                                     <i className="bi bi-box-seam fs-1 d-block mb-3"></i>
                                     <p>Selecciona un producto para ver sus detalles</p>
                                 </div>
@@ -537,7 +538,7 @@ const Admin_Products: React.FC = () => {
                     </div>
                 </div>
             )}
-        </div>
+        </StickyContainer>
     );
 };
 

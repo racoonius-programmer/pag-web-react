@@ -2,7 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import type { Usuario } from '../../types/User';
 import { UsuarioService, type UsuarioPayload } from '../../services/usuario.service';
+import { PedidoService } from '../../services/pedido.service';
 import StickyContainer from '../../components/StickyContainer';
+import Modal from '../../components/Modal';
+import { useModal } from '../../hooks/Modal';
 
 /*
   Funcionalidad principal:
@@ -10,6 +13,8 @@ import StickyContainer from '../../components/StickyContainer';
   - Permite buscar y filtrar por rol y por si tienen descuento DUOC.
   - Permite acciones de administración: ver detalles, asignar/quitar rol admin,
     activar/desactivar descuento DUOC y eliminar usuarios.
+  - Validación: no permite eliminar usuarios con pedidos activos.
+  - Usa modales en lugar de alerts para mejor UX.
 
   Notas:
     Las actualizaciones se envían a la API para persistencia.
@@ -27,6 +32,28 @@ const Admin_Users: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterRole, setFilterRole] = useState<'all' | 'admin' | 'usuario'>('all');
     const [filterDuoc, setFilterDuoc] = useState<'all' | 'si' | 'no'>('all');
+
+    // Modal principal para mensajes informativos
+    const { modalState, showModal, handleClose } = useModal();
+
+    // Modal de confirmación para eliminaciones
+    const [confirmModal, setConfirmModal] = useState<{
+        show: boolean;
+        title: string;
+        message: string;
+        onConfirm: () => void;
+        confirmText?: string;
+        cancelText?: string;
+        type?: 'danger' | 'warning' | 'info';
+    }>({
+        show: false,
+        title: '',
+        message: '',
+        onConfirm: () => {},
+        confirmText: 'Confirmar',
+        cancelText: 'Cancelar',
+        type: 'danger'
+    });
 
     // Cargar usuarios al montar el componente
     useEffect(() => {
@@ -48,24 +75,65 @@ const Admin_Users: React.FC = () => {
         }
     };
 
-    // Elimina un usuario (con confirmación browser)
-    // Envía la eliminación a la API y actualiza el estado local
+    // Elimina un usuario (con confirmación modal y validación de pedidos activos)
     const deleteUser = async (userId: number) => {
-        if (window.confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
-            try {
-                await UsuarioService.eliminar(userId);
-                const updatedUsers = usuarios.filter(u => u.id !== userId);
-                setUsuarios(updatedUsers);
-                setSelectedUser(null);
-            } catch (err) {
-                console.error('Error al eliminar usuario:', err);
-                alert('Error al eliminar el usuario');
+        try {
+            // Verificar si el usuario tiene pedidos activos
+            const tienePedidosActivos = await PedidoService.usuarioTienePedidosActivos(userId);
+            
+            if (tienePedidosActivos) {
+                // Obtener información detallada de los pedidos activos
+                const pedidosActivos = await PedidoService.obtenerPedidosActivosUsuario(userId);
+                const cantidadPedidos = pedidosActivos.length;
+                const usuario = usuarios.find(u => u.id === userId);
+                
+                showModal(
+                    `No se puede eliminar el usuario "${usuario?.username}" porque tiene ${cantidadPedidos} pedido(s) activo(s) en preparación.\n\nPrimero debe completar o cancelar todos sus pedidos pendientes.`,
+                    'No se puede eliminar el usuario'
+                );
+                return;
             }
+
+            // Si no tiene pedidos activos, mostrar confirmación
+            const usuario = usuarios.find(u => u.id === userId);
+            setConfirmModal({
+                show: true,
+                title: 'Confirmar Eliminación',
+                message: `¿Estás seguro de que quieres eliminar al usuario "${usuario?.username}"?\n\nEsta acción no se puede deshacer y se perderán todos los datos del usuario.`,
+                confirmText: 'Eliminar Usuario',
+                cancelText: 'Cancelar',
+                type: 'danger',
+                onConfirm: async () => {
+                    try {
+                        await UsuarioService.eliminar(userId);
+                        const updatedUsers = usuarios.filter(u => u.id !== userId);
+                        setUsuarios(updatedUsers);
+                        setSelectedUser(null);
+                        setConfirmModal({ ...confirmModal, show: false });
+                        showModal(
+                            `El usuario "${usuario?.username}" ha sido eliminado exitosamente.`,
+                            'Usuario Eliminado'
+                        );
+                    } catch (err) {
+                        console.error('Error al eliminar usuario:', err);
+                        setConfirmModal({ ...confirmModal, show: false });
+                        showModal(
+                            'Ocurrió un error al eliminar el usuario. Por favor, intenta nuevamente.',
+                            'Error al eliminar'
+                        );
+                    }
+                }
+            });
+        } catch (err) {
+            console.error('Error al verificar pedidos del usuario:', err);
+            showModal(
+                'Error al verificar los pedidos del usuario. Por favor, intenta nuevamente.',
+                'Error de verificación'
+            );
         }
     };
 
     // Alterna el rol entre 'admin' y 'usuario'
-    // Actualiza en la API y el estado local
     const toggleUserRole = async (userId: number) => {
         const usuario = usuarios.find(u => u.id === userId);
         if (!usuario) return;
@@ -97,14 +165,21 @@ const Admin_Users: React.FC = () => {
             if (selectedUser && selectedUser.id === userId) {
                 setSelectedUser(usuarioResponse);
             }
+
+            showModal(
+                `El rol del usuario "${usuario.username}" ha sido cambiado a "${nuevoRol}" exitosamente.`,
+                'Rol Actualizado'
+            );
         } catch (err) {
             console.error('Error al actualizar rol de usuario:', err);
-            alert('Error al actualizar el rol del usuario');
+            showModal(
+                'Error al actualizar el rol del usuario. Por favor, intenta nuevamente.',
+                'Error al actualizar rol'
+            );
         }
     };
 
     // Alterna el flag `descuentoDuoc` para un usuario
-    // Igual que el anterior, actualiza en API y estado local
     const toggleDuocDiscount = async (userId: number) => {
         const usuario = usuarios.find(u => u.id === userId);
         if (!usuario) return;
@@ -135,9 +210,18 @@ const Admin_Users: React.FC = () => {
             if (selectedUser && selectedUser.id === userId) {
                 setSelectedUser(usuarioResponse);
             }
+
+            const accion = usuario.descuentoDuoc ? 'desactivado' : 'activado';
+            showModal(
+                `El descuento DUOC para "${usuario.username}" ha sido ${accion} exitosamente.`,
+                'Descuento DUOC Actualizado'
+            );
         } catch (err) {
             console.error('Error al actualizar descuento DUOC:', err);
-            alert('Error al actualizar el descuento DUOC');
+            showModal(
+                'Error al actualizar el descuento DUOC. Por favor, intenta nuevamente.',
+                'Error al actualizar descuento'
+            );
         }
     };
 
@@ -153,11 +237,6 @@ const Admin_Users: React.FC = () => {
         return matchesSearch && matchesRole && matchesDuoc;
     });
 
-    // -----------------
-    // JSX: la estructura visual
-    // - columna izquierda: lista y acciones
-    // - columna derecha: detalles del usuario seleccionado
-    // -----------------
     return (
         <StickyContainer>
             <div className="row g-4">
@@ -404,22 +483,60 @@ const Admin_Users: React.FC = () => {
                     </>
                 )}
             </div>
+
+            {/* Modal principal para mensajes informativos */}
+            <Modal
+                show={modalState.show}
+                title={modalState.title}
+                message={modalState.message}
+                onClose={handleClose}
+                onHiddenCallback={modalState.onHiddenCallback}
+            />
+
+            {/* Modal de confirmación personalizado */}
+            {confirmModal.show && (
+                <div className="modal fade show d-block" tabIndex={-1} style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content bg-dark text-light border-secondary">
+                            <div className="modal-header border-secondary">
+                                <h5 className="modal-title text-light">
+                                    <i className={`bi bi-${confirmModal.type === 'danger' ? 'exclamation-triangle' : 'question-circle'} me-2`}></i>
+                                    {confirmModal.title}
+                                </h5>
+                                <button 
+                                    type="button" 
+                                    className="btn-close btn-close-white" 
+                                    onClick={() => setConfirmModal({ ...confirmModal, show: false })}
+                                ></button>
+                            </div>
+                            <div className="modal-body">
+                                <p className="text-light" style={{ whiteSpace: 'pre-line' }}>
+                                    {confirmModal.message}
+                                </p>
+                            </div>
+                            <div className="modal-footer border-secondary">
+                                <button 
+                                    type="button" 
+                                    className="btn btn-secondary"
+                                    onClick={() => setConfirmModal({ ...confirmModal, show: false })}
+                                >
+                                    {confirmModal.cancelText}
+                                </button>
+                                <button 
+                                    type="button" 
+                                    className={`btn btn-${confirmModal.type === 'danger' ? 'danger' : 'primary'}`}
+                                    onClick={confirmModal.onConfirm}
+                                >
+                                    <i className={`bi bi-${confirmModal.type === 'danger' ? 'trash' : 'check'} me-1`}></i>
+                                    {confirmModal.confirmText}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </StickyContainer>
     );
 };
 
 export default Admin_Users;
-
-/*
-  Dónde se importa / usa este componente `Admin_Users`:
-  - src/App.tsx
-    * Importa `Admin_Users` y lo monta en la ruta del área administrativa:  
-      `<Route path="users" element={<Admin_Users />} />` dentro de la ruta `/admin`.
-    * Por qué: es la entrada principal para la gestión de usuarios desde el panel admin.
-
-  - src/pages/admin/Admin_Layout.tsx
-    * No lo importa directamente, pero el layout (sidebar) incluye la navegación que
-      permite acceder a `/admin/users`.
-    * Por qué: el layout centraliza la navegación del admin y permite que `Admin_Users`
-      se muestre dentro del mismo contenedor (Outlet) compartido.
-*/

@@ -5,6 +5,7 @@ import { useProducts } from '../../hooks/UseProducts';
 import ProductFormModal from '../../components/ProductFormModal';
 import Modal from '../../components/Modal';
 import { useModal } from '../../hooks/Modal';
+import { PedidoService } from '../../services/pedido.service';
 import StickyContainer from '../../components/StickyContainer';
 
 /*
@@ -18,6 +19,7 @@ import StickyContainer from '../../components/StickyContainer';
   - Muestra una lista con acciones: ver detalles, editar, clonar, eliminar.
   - Usa `ProductFormModal` para agregar/editar productos y `Modal`/`useModal` para
     mensajes informativos (éxito/error).
+  - Validación: no permite eliminar productos vinculados a pedidos activos.
 
   Nota: la lógica de persistencia (localStorage) está dentro de `useProducts()`.
 */
@@ -140,21 +142,42 @@ const Admin_Products: React.FC = () => {
         }
     };
 
-    // Eliminar producto: abre confirmación y en onConfirm borra y muestra modal de éxito
-    const handleDeleteProduct = (codigo: string, nombre: string) => {
-        setConfirmModal({
-            show: true,
-            title: 'Confirmar Eliminación',
-            message: `¿Estás seguro de que quieres eliminar "${nombre}"? Esta acción no se puede deshacer.`,
-            onConfirm: () => {
-                deleteProduct(codigo);
-                if (selectedProduct && selectedProduct.codigo === codigo) {
-                    setSelectedProduct(null);
-                }
-                setConfirmModal({ show: false, title: '', message: '', onConfirm: () => {} });
-                showModal(`Producto "${nombre}" eliminado exitosamente`, 'Producto Eliminado');
+    // Eliminar producto: verifica pedidos activos, abre confirmación y en onConfirm borra y muestra modal de éxito
+    const handleDeleteProduct = async (codigo: string, nombre: string) => {
+        try {
+            // Verificar si el producto está vinculado a pedidos activos
+            const tienePedidosActivos = await PedidoService.productoTienePedidosActivos(codigo);
+            
+            if (tienePedidosActivos) {
+                // Obtener información detallada de los pedidos activos
+                const pedidosActivos = await PedidoService.obtenerPedidosActivosProducto(codigo);
+                const cantidadPedidos = pedidosActivos.length;
+                
+                showModal(
+                    `No se puede eliminar el producto "${nombre}" porque está vinculado a ${cantidadPedidos} pedido(s) activo(s) en preparación.\n\nPrimero se deben completar o cancelar todos los pedidos que contienen este producto.`,
+                    'No se puede eliminar el producto'
+                );
+                return;
             }
-        });
+
+            // Si no está vinculado a pedidos activos, proceder con la confirmación normal
+            setConfirmModal({
+                show: true,
+                title: 'Confirmar Eliminación',
+                message: `¿Estás seguro de que quieres eliminar "${nombre}"? Esta acción no se puede deshacer.`,
+                onConfirm: () => {
+                    deleteProduct(codigo);
+                    if (selectedProduct && selectedProduct.codigo === codigo) {
+                        setSelectedProduct(null);
+                    }
+                    setConfirmModal({ show: false, title: '', message: '', onConfirm: () => {} });
+                    showModal(`Producto "${nombre}" eliminado exitosamente`, 'Producto Eliminado');
+                }
+            });
+        } catch (error) {
+            console.error('Error al verificar o eliminar producto:', error);
+            showModal('Error al verificar o eliminar el producto. Por favor, intenta nuevamente.', 'Error');
+        }
     };
 
     // Maneja el submit del ProductFormModal (agregar o editar según modalMode)
@@ -196,13 +219,6 @@ const Admin_Products: React.FC = () => {
                             <span className="badge bg-primary fs-6">
                                 {filteredProducts.length} productos
                             </span>
-                            <button 
-                                className="btn btn-success btn-sm"
-                                onClick={handleAddProduct}
-                            >
-                                <i className="bi bi-plus-lg me-1"></i>
-                                Agregar Producto
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -292,11 +308,17 @@ const Admin_Products: React.FC = () => {
                         </div>
                     </div>
                 </div>
-                
                 <div className="col-lg-8">
                     <div className="card bg-dark text-white">
-                        <div className="card-header">
+                        <div className="card-header d-flex justify-content-between align-items-center">
                             <h5 className="mb-0">Lista de Productos</h5>
+                            <button 
+                                className="btn btn-success btn-sm"
+                                onClick={handleAddProduct}
+                            >
+                                <i className="bi bi-plus-lg me-1"></i>
+                                Agregar Producto
+                            </button>
                         </div>
                         <div className="card-body">
                             <div className="table-responsive">
@@ -313,7 +335,14 @@ const Admin_Products: React.FC = () => {
                                     </thead>
                                     <tbody>
                                         {filteredProducts.map(producto => (
-                                            <tr key={producto.codigo}>
+                                            <tr 
+                                                key={producto.codigo}
+                                                className={selectedProduct?.codigo === producto.codigo ? 'table-warning' : ''}
+                                                style={selectedProduct?.codigo === producto.codigo ? {
+                                                    backgroundColor: '#ffc107 !important',
+                                                    color: '#000'
+                                                } : {}}
+                                            >
                                                 <td>
                                                     <img 
                                                         src={producto.imagen} 

@@ -130,6 +130,76 @@ export const PedidoService = {
 
   async eliminar(id: number): Promise<void> {
     await apiClient.delete(`${resource}/${id}`);
+  },
+
+  /**
+   * Verifica si un usuario tiene pedidos activos (en preparación)
+   * @param clienteId ID del usuario a verificar
+   * @returns true si tiene pedidos activos, false si no
+   */
+  async usuarioTienePedidosActivos(clienteId: number): Promise<boolean> {
+    try {
+      const pedidos = await this.listar();
+      return pedidos.some(pedido => 
+        pedido.clienteId === clienteId && pedido.estado === 'en preparacion'
+      );
+    } catch (error) {
+      console.error('[PedidoService] Error al verificar pedidos activos del usuario:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Verifica si un producto está vinculado a pedidos activos (en preparación)
+   * @param codigoProducto Código del producto a verificar
+   * @returns true si está vinculado a pedidos activos, false si no
+   */
+  async productoTienePedidosActivos(codigoProducto: string): Promise<boolean> {
+    try {
+      const pedidos = await this.listar();
+      return pedidos.some(pedido => 
+        pedido.estado === 'en preparacion' && 
+        pedido.productos.some(producto => producto.codigo === codigoProducto)
+      );
+    } catch (error) {
+      console.error('[PedidoService] Error al verificar pedidos activos del producto:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtiene información detallada de los pedidos activos de un usuario
+   * @param clienteId ID del usuario
+   * @returns Array de pedidos activos con información detallada
+   */
+  async obtenerPedidosActivosUsuario(clienteId: number): Promise<Pedido[]> {
+    try {
+      const pedidos = await this.listar();
+      return pedidos.filter(pedido => 
+        pedido.clienteId === clienteId && pedido.estado === 'en preparacion'
+      );
+    } catch (error) {
+      console.error('[PedidoService] Error al obtener pedidos activos del usuario:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtiene información detallada de los pedidos activos que contienen un producto
+   * @param codigoProducto Código del producto
+   * @returns Array de pedidos activos que contienen el producto
+   */
+  async obtenerPedidosActivosProducto(codigoProducto: string): Promise<Pedido[]> {
+    try {
+      const pedidos = await this.listar();
+      return pedidos.filter(pedido => 
+        pedido.estado === 'en preparacion' && 
+        pedido.productos.some(producto => producto.codigo === codigoProducto)
+      );
+    } catch (error) {
+      console.error('[PedidoService] Error al obtener pedidos activos del producto:', error);
+      throw error;
+    }
   }
 };
 

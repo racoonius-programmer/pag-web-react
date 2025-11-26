@@ -1,5 +1,17 @@
+/*
+    Cambios realizados:
+    - Ahora se lee `usuarioActual` desde `sessionStorage` en vez de `localStorage`.
+    - Se utiliza el helper `getSessionItem` (desde `./useSessionStorage`) para obtener
+        el valor de sesión. Razonamiento: la sesión del usuario debe expirar al cerrar
+        el navegador; los datos persistentes (usuarios, puntos, wishlist) siguen en
+        `localStorage` si es necesario.
+    - Este cambio afecta la validación de rutas protegidas y la forma en que los
+        componentes detectan si el usuario está autenticado.
+*/
+
 import { useState, useEffect } from 'react';
 import { UsuarioService } from '../services/usuario.service';
+import { getSessionItem } from './useSessionStorage';
 import type { Usuario } from '../types/User';
 
 /**
@@ -12,7 +24,7 @@ export const useUsuarioActual = () => {
     const [error, setError] = useState<string | null>(null);
 
     const obtenerUsuarioActual = async (): Promise<Usuario | null> => {
-        const usuarioActualRaw = localStorage.getItem("usuarioActual");
+        const usuarioActualRaw = getSessionItem("usuarioActual");
         if (!usuarioActualRaw) return null;
 
         try {

@@ -1,9 +1,19 @@
+/*
+    Cambios realizados:
+    - Lectura de `usuarioActual` desde `sessionStorage` usando `getSessionItem`.
+    - Logout ahora remueve la entrada de sesión con `removeSessionItem`.
+    - Motivo: mantener `usuarioActual` ligado a la sesión del navegador (se borra
+        al cerrar la pestaña/ventana), evitando que el usuario permanezca logueado
+        después de cerrar el navegador.
+*/
+
 import React, { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 // 1. Importa los tipos desde sus nuevos archivos
 import type { Product } from '../types/Product'; 
 import type { UsuarioSesion } from '../types/User'; 
+import { getSessionItem, removeSessionItem } from '../hooks/useSessionStorage';
 
 // Importa la base de datos simulada
 import productosDB from '../data/productos.json'; 
@@ -33,7 +43,7 @@ const formatearCategoria = (categoria: string): string => {
  * - Usa `useMemo` para generar la lista única de categorías a partir de `productos.json`.
  */
 const Header: React.FC = () => {
-    const usuarioActualJSON = localStorage.getItem("usuarioActual");
+    const usuarioActualJSON = getSessionItem("usuarioActual");
     const usuarioActual: UsuarioSesion | null = usuarioActualJSON ? JSON.parse(usuarioActualJSON) : null;
     
     const navigate = useNavigate();
@@ -53,7 +63,7 @@ const Header: React.FC = () => {
 
     const handleCerrarSesion = (e: React.MouseEvent) => {
         e.preventDefault();
-        localStorage.removeItem("usuarioActual");
+        removeSessionItem("usuarioActual");
         // Forzar recarga completa y navegar a /main
         window.location.href = '/main';
     };

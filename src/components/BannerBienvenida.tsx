@@ -1,13 +1,22 @@
+/*
+    Cambios realizados:
+    - Ahora el componente lee `usuarioActual` desde `sessionStorage` mediante
+        el helper `getSessionItem` (archivo `src/hooks/useSessionStorage.ts`).
+    - Razonamiento: `usuarioActual` representa la sesión activa del navegador
+        y debe expirar al cerrar la pestaña/ventana. Esta nota ayuda a entender
+        por qué el componente ya no accede a `localStorage` para la sesión.
+*/
+
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 // Importa el tipo de sesión
 import type { UsuarioSesion } from '../types/User'; 
+import { getSessionItem } from '../hooks/useSessionStorage';
 
-// Función auxiliar para obtener el usuario desde localStorage
-// (Nota: cambiamos el tipo de retorno para que coincida con UsuarioSesion)
+// Función auxiliar para obtener el usuario desde sessionStorage
 const obtenerUsuarioActual = (): UsuarioSesion | null => {
-    const usuarioJSON = localStorage.getItem("usuarioActual");
+    const usuarioJSON = getSessionItem("usuarioActual");
     return usuarioJSON ? JSON.parse(usuarioJSON) : null;
 };
 

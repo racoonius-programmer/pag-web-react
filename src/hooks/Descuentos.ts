@@ -1,7 +1,16 @@
+/*
+    Cambios realizados:
+    - Este hook ahora obtiene `usuarioActual` desde `sessionStorage` mediante
+        `getSessionItem` para decidir si aplica el descuento DUOC.
+    - Razonamiento: la pertenencia a una sesión activa afecta al cálculo del
+        descuento; centralizamos la lectura en `useSessionStorage`.
+*/
 // src/hooks/useDescuento.ts
 import { useMemo } from 'react';
 import type { Product } from '../types/Product';
 import type { UsuarioSesion } from '../types/User'; 
+import { getSessionItem } from './useSessionStorage';
+import { getSessionItem } from './useSessionStorage';
 
 /**
  * Hook personalizado que calcula el precio final de un producto aplicando el descuento Duoc
@@ -15,8 +24,8 @@ export const usarDescuento = (producto: Product) => {
     // cuando el producto (o implícitamente, el usuario logueado) cambie.
     const { precioFinal, tieneDescuento } = useMemo(() => {
         
-        // 1. Obtener el usuario de localStorage
-        const usuarioActualJSON = localStorage.getItem('usuarioActual');
+        // 1. Obtener el usuario desde sessionStorage
+        const usuarioActualJSON = getSessionItem('usuarioActual');
         const usuario: UsuarioSesion | undefined = usuarioActualJSON ? JSON.parse(usuarioActualJSON) : undefined;
         
         // 2. Definir la condición de descuento (simulación)

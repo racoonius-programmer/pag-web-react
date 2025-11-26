@@ -6,6 +6,9 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
 
+// Hook para manejar logout entre pestañas
+import { useLogoutHandler } from "./hooks/useSessionStorage";
+
 // Páginas
 import MainScreen from "./pages/Inicio";
 import LoginScreen from "./pages/User_Login";
@@ -31,6 +34,9 @@ import OrdersPage from './pages/Orders';
 import Admin_Orders from './pages/admin/Admin_Orders';
 
 const App: React.FC = () => {
+  // Activar el manejo de logout entre pestañas
+  useLogoutHandler();
+
   return (
     <Router>
       <div

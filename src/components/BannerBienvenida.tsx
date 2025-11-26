@@ -7,28 +7,15 @@
         por qué el componente ya no accede a `localStorage` para la sesión.
 */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 
-// Importa el tipo de sesión
-import type { UsuarioSesion } from '../types/User'; 
-import { getSessionItem } from '../hooks/useSessionStorage';
-
-// Función auxiliar para obtener el usuario desde sessionStorage
-const obtenerUsuarioActual = (): UsuarioSesion | null => {
-    const usuarioJSON = getSessionItem("usuarioActual");
-    return usuarioJSON ? JSON.parse(usuarioJSON) : null;
-};
+// Importa el hook reactivo para usuario
+import { useReactiveUser } from '../hooks/useReactiveUser';
 
 const BannerBienvenida: React.FC = () => {
-    // Usamos el tipo UsuarioSesion en el estado
-    const [usuarioLogueado, setUsuarioLogueado] = useState<UsuarioSesion | null>(null);
-
-
-    // Carga el estado del usuario al montar el componente
-    useEffect(() => {
-        setUsuarioLogueado(obtenerUsuarioActual());
-    }, []);
+    // Usar el hook reactivo que se sincroniza automáticamente
+    const { usuarioActual: usuarioLogueado } = useReactiveUser();
 
     if (usuarioLogueado) {
         // Lógica para Usuario Logueado (Admin o User)

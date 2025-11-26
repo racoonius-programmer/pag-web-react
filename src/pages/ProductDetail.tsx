@@ -2,7 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { useCartContext } from '../hooks/UseCart';
 import { useNavigate, useParams } from 'react-router-dom';
 import productosData from '../data/productos.json';
+import { getSessionItem } from '../hooks/useSessionStorage';
 import type { Product, Comentario } from '../types/Product';
+
+/*
+  Cambios realizados:
+  - La comprobación de si hay un usuario logueado (`usuarioActual`) ahora usa
+    `sessionStorage` mediante `getSessionItem` para decidir comportamiento
+    (por ejemplo redirecciones al login antes de acciones protegidas).
+  - Razonamiento: `usuarioActual` representa la sesión activa, que debe expirar
+    al cerrar la pestaña/ventana. Otros datos persisten en `localStorage`.
+*/
 
 const ProductDetail: React.FC = () => {
   /*
@@ -77,10 +87,10 @@ const ProductDetail: React.FC = () => {
     );
   }
 
-  // Información del usuario logueado (si existe) leída desde localStorage.
+  // Información del usuario logueado (si existe) leída desde sessionStorage.
   const usuarioLogueado = (() => {
     try {
-      return JSON.parse(localStorage.getItem('usuarioActual') || 'null');
+      return JSON.parse(getSessionItem('usuarioActual') || 'null');
     } catch {
       return null;
     }

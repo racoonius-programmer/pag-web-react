@@ -1,25 +1,21 @@
-import React, { useEffect, useState } from 'react';
+/*
+    Cambios realizados:
+    - Ahora el componente lee `usuarioActual` desde `sessionStorage` mediante
+        el helper `getSessionItem` (archivo `src/hooks/useSessionStorage.ts`).
+    - Razonamiento: `usuarioActual` representa la sesión activa del navegador
+        y debe expirar al cerrar la pestaña/ventana. Esta nota ayuda a entender
+        por qué el componente ya no accede a `localStorage` para la sesión.
+*/
+
+import React from 'react';
 import { Link } from 'react-router-dom';
 
-// Importa el tipo de sesión
-import type { UsuarioSesion } from '../types/User'; 
-
-// Función auxiliar para obtener el usuario desde localStorage
-// (Nota: cambiamos el tipo de retorno para que coincida con UsuarioSesion)
-const obtenerUsuarioActual = (): UsuarioSesion | null => {
-    const usuarioJSON = localStorage.getItem("usuarioActual");
-    return usuarioJSON ? JSON.parse(usuarioJSON) : null;
-};
+// Importa el hook reactivo para usuario
+import { useReactiveUser } from '../hooks/useReactiveUser';
 
 const BannerBienvenida: React.FC = () => {
-    // Usamos el tipo UsuarioSesion en el estado
-    const [usuarioLogueado, setUsuarioLogueado] = useState<UsuarioSesion | null>(null);
-
-
-    // Carga el estado del usuario al montar el componente
-    useEffect(() => {
-        setUsuarioLogueado(obtenerUsuarioActual());
-    }, []);
+    // Usar el hook reactivo que se sincroniza automáticamente
+    const { usuarioActual: usuarioLogueado } = useReactiveUser();
 
     if (usuarioLogueado) {
         // Lógica para Usuario Logueado (Admin o User)

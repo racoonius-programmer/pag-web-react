@@ -30,6 +30,7 @@ import { useNavigate } from 'react-router-dom';
 import Modal from '../components/Modal'; 
 import PasswordInput from '../components/PasswordInput';
 import { UsuarioService } from '../services/usuario.service';
+import { setSessionItem } from '../hooks/useSessionStorage';
 
 // ----------------------------------------------------------------------
 // 1. CONSTANTES Y TIPOS
@@ -177,8 +178,8 @@ const UserLogin: React.FC = () => {
                 return;
             }
 
-            // Guardar sesión activa en localStorage (clave: 'usuarioActual').
-            localStorage.setItem('usuarioActual', JSON.stringify(usuario));
+            // Guardar sesión activa en sessionStorage (clave: 'usuarioActual').
+            setSessionItem('usuarioActual', usuario);
 
             // Determinar ruta de redirección según el rol del usuario.
             const redirectPath = usuario.rol === 'admin' ? '/admin' : '/main';

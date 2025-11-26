@@ -1,7 +1,14 @@
+/*
+	Cambios realizados:
+	- `usuarioActual` ahora se carga desde `sessionStorage` mediante `getSessionItem`.
+	- Esto asegura que la información de sesión se pierda al cerrar la pestaña/ventana.
+	- Los datos persistentes (por ejemplo `puntosLevelUp`) siguen en `localStorage`.
+*/
 import React, { useEffect, useState } from 'react';
 import { useCartContext } from '../hooks/UseCart';
 import { useNavigate } from 'react-router-dom';
 import type { Usuario } from '../types/User';
+import { getSessionItem } from '../hooks/useSessionStorage';
 import useOrders from '../hooks/UseOrders';
 import type { PedidoProducto } from '../types/Pedido';
 
@@ -35,10 +42,10 @@ const Payment: React.FC = () => {
 
 	// Efecto: al cambiar `totalAmount` recalculamos puntos y cargamos el usuario desde localStorage.
 	useEffect(() => {
-		// Intentamos leer `usuarioActual` desde localStorage. Si no existe o la lectura falla,
+		// Intentamos leer `usuarioActual` desde sessionStorage. Si no existe o la lectura falla,
 		// dejamos `usuario` en null.
 		try {
-			const usuarioActual = localStorage.getItem('usuarioActual');
+			const usuarioActual = getSessionItem('usuarioActual');
 			setUsuario(usuarioActual ? JSON.parse(usuarioActual) : null);
 		} catch {
 			setUsuario(null);

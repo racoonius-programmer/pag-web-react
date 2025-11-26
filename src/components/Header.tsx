@@ -1,9 +1,19 @@
+/*
+    Cambios realizados:
+    - Lectura de `usuarioActual` desde `sessionStorage` usando `getSessionItem`.
+    - Logout ahora remueve la entrada de sesión con `removeSessionItem`.
+    - Motivo: mantener `usuarioActual` ligado a la sesión del navegador (se borra
+        al cerrar la pestaña/ventana), evitando que el usuario permanezca logueado
+        después de cerrar el navegador.
+*/
+
 import React, { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 // 1. Importa los tipos desde sus nuevos archivos
 import type { Product } from '../types/Product'; 
-import type { UsuarioSesion } from '../types/User'; 
+import { removeSessionItem } from '../hooks/useSessionStorage';
+import { useReactiveUser } from '../hooks/useReactiveUser';
 
 // Importa la base de datos simulada
 import productosDB from '../data/productos.json'; 
@@ -33,11 +43,13 @@ const formatearCategoria = (categoria: string): string => {
  * - Usa `useMemo` para generar la lista única de categorías a partir de `productos.json`.
  */
 const Header: React.FC = () => {
-    const usuarioActualJSON = localStorage.getItem("usuarioActual");
-    const usuarioActual: UsuarioSesion | null = usuarioActualJSON ? JSON.parse(usuarioActualJSON) : null;
+    // Usar el hook reactivo más robusto
+    const { usuarioActual, logout, updateTrigger } = useReactiveUser();
     
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = React.useState('');
+
+
 
     // 2. LÓGICA PARA OBTENER CATEGORÍAS ÚNICAS (Solo se recalcula si productosDB cambia, que es poco probable)
     const categoriasUnicas: string[] = useMemo(() => {
@@ -49,13 +61,19 @@ const Header: React.FC = () => {
         
         // 2. Filtra para obtener solo los valores únicos
         return Array.from(new Set(todasLasCategorias));
-    }, []); // El array vacío [] asegura que se ejecute solo una vez
+    }, [updateTrigger]); // Incluir updateTrigger para forzar recálculo
 
     const handleCerrarSesion = (e: React.MouseEvent) => {
         e.preventDefault();
-        localStorage.removeItem("usuarioActual");
-        // Forzar recarga completa y navegar a /main
-        window.location.href = '/main';
+        
+        // Usar el logout del hook robusto
+        logout();
+        
+        // Remover la sesión - esto automáticamente notificará a todas las pestañas
+        removeSessionItem("usuarioActual");
+        
+        // No necesitamos redireccionar aquí porque useLogoutHandler se encarga
+        // La redirección se maneja automáticamente según la página actual
     };
 
     const handleSearch = (e: React.FormEvent) => {

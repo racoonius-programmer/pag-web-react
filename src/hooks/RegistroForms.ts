@@ -1,5 +1,15 @@
+/*
+    Cambios realizados:
+    - En el flujo de registro, el usuario recién creado se guarda en `sessionStorage`
+        usando `setSessionItem('usuarioActual', ...)` en lugar de `localStorage`.
+    - Al verificar si hay un admin logueado, ahora se lee la clave desde
+        `sessionStorage` con `getSessionItem`.
+    - Motivo: mantener `usuarioActual` ligado a la sesión del navegador (cierres)
+        mientras que la lista de `usuarios` se mantiene en `localStorage`.
+*/
 // src/hooks/useRegistroForm.ts
 import { useState, useMemo, useCallback, useEffect, type ChangeEvent, type FormEvent } from 'react';
+import { getSessionItem, setSessionItem } from './useSessionStorage';
 import { UsuarioService, type UsuarioPayload } from '../services/usuario.service';
 
 // ----------------------------------------------------------------------
@@ -286,12 +296,12 @@ export function useRegistroForm(
             let redirectPath = "/main";
 
             // Verificar si hay un admin logueado
-            const usuarioLogueado = JSON.parse(localStorage.getItem("usuarioActual") || "null");
+            const usuarioLogueado = JSON.parse(getSessionItem("usuarioActual") || "null");
             if (usuarioLogueado && usuarioLogueado.rol === 'admin') {
                 redirectPath = "/admin";
             } else {
-                // Loguear al nuevo usuario
-                localStorage.setItem("usuarioActual", JSON.stringify(nuevoUsuario));
+                // Loguear al nuevo usuario (sesión de navegador)
+                setSessionItem("usuarioActual", nuevoUsuario);
             }
 
             // Mostrar Modal con Callback de Redirección

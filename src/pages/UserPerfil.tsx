@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getSessionItem, setSessionItem } from '../hooks/useSessionStorage';
 import Modal from '../components/Modal';
 import { useRegionesComunas } from '../hooks/RegionesComunas';
 import { useModal } from '../hooks/Modal';
@@ -9,17 +10,18 @@ import { InputWithValidation } from '../components/InputsRegistro';
  * UserPerfil.tsx
  * --------------
  * Página para ver y editar el perfil del usuario autenticado.
- * Propósitos principales:
- * - Cargar los datos del `usuarioActual` desde localStorage al montar.
- * - Permitir editar campos no críticos (nombre, fecha, teléfono, región/comuna, dirección, fotoUrl).
- * - Validar los campos en el cliente antes de persistir los cambios en localStorage.
- * - Reutiliza hooks y componentes ya existentes (`useRegionesComunas`, `useModal`, `RegionComunaSelects`, `InputWithValidation`).
  *
- * Notas:
- * - Los datos de usuario se almacenan localmente en `localStorage` en este proyecto (simulación).
- * - Al guardar, se actualiza tanto `usuarioActual` como el array `usuarios` en localStorage,
- *   preservando campos sensibles (como la contraseña) al usar spread sobre el objeto existente.
- * - La lógica de validación aquí es similar a `User_Register` — mantenerla sincronizada si se cambia.
+ * Cambios importantes realizados:
+ * - `usuarioActual` se lee y se actualiza desde `sessionStorage` (helpers
+ *   `getSessionItem` / `setSessionItem` en `src/hooks/useSessionStorage`).
+ *   Esto significa que la sesión del usuario expira al cerrar la pestaña/ventana.
+ * - La lista global de `usuarios` (registro) se mantiene en `localStorage`.
+ * - Al guardar el perfil, se actualiza la entrada de sesión (`usuarioActual`) en
+ *   `sessionStorage` y el array `usuarios` en `localStorage` para persistencia.
+ *
+ * Razonamiento:
+ * - Separar lo que es sesión (temporal) de lo que es persistente (usuarios)
+ *   ayuda a evitar que un usuario permanezca autenticado tras cerrar el navegador.
  */
 
 const UserPerfil: React.FC = () => {
@@ -63,7 +65,7 @@ const UserPerfil: React.FC = () => {
     // Cargar datos del usuario al montar
     useEffect(() => {
         try {
-            const usuarioActualStr = localStorage.getItem('usuarioActual');
+            const usuarioActualStr = getSessionItem('usuarioActual');
             if (usuarioActualStr) {
                 const usuario = JSON.parse(usuarioActualStr);
                 setUsername(usuario.username || '');
@@ -92,7 +94,7 @@ const UserPerfil: React.FC = () => {
     // Cargar comuna después de que las comunas estén disponibles
     useEffect(() => {
         try {
-            const usuarioActualStr = localStorage.getItem('usuarioActual');
+            const usuarioActualStr = getSessionItem('usuarioActual');
             if (usuarioActualStr && comunasOptions.length > 0) {
                 const usuario = JSON.parse(usuarioActualStr);
                 if (usuario.comuna) {
@@ -250,7 +252,7 @@ const UserPerfil: React.FC = () => {
 
         try {
             // Obtener datos actuales del usuario
-            const usuarioActualStr = localStorage.getItem('usuarioActual');
+            const usuarioActualStr = getSessionItem('usuarioActual');
             const usuariosStr = localStorage.getItem('usuarios');
             
             if (!usuarioActualStr || !usuariosStr) {
@@ -280,8 +282,8 @@ const UserPerfil: React.FC = () => {
                 localStorage.setItem('usuarios', JSON.stringify(usuarios));
             }
 
-            // Actualizar usuario actual
-            localStorage.setItem('usuarioActual', JSON.stringify(usuarioActualizado));
+            // Actualizar usuario actual (session)
+            setSessionItem('usuarioActual', usuarioActualizado);
 
             modal.showModal(
                 'Los cambios se han guardado correctamente.',

@@ -1,6 +1,3 @@
-// src/hooks/useReactiveUser.ts
-// Hook más robusto para manejar el estado del usuario con reactividad garantizada
-
 import { useState, useEffect, useCallback } from 'react';
 import { getSessionItem } from './useSessionStorage';
 import type { UsuarioSesion } from '../types/User';

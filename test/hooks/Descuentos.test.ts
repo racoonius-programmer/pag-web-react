@@ -25,11 +25,11 @@ const productoConDecimal: Product = { id: 2, nombre: 'Producto 99', precio: 99, 
  * Ayudante para simular el estado de localStorage
  * @param usuario Objeto de usuario o null para limpiar
  */
-const mockLocalStorageUsuario = (usuario: UsuarioSesion | null) => {
+const mockSessionStorageUsuario = (usuario: UsuarioSesion | null) => {
     if (usuario) {
-        localStorage.setItem('usuarioActual', JSON.stringify(usuario));
+        sessionStorage.setItem('usuarioActual', JSON.stringify(usuario));
     } else {
-        localStorage.removeItem('usuarioActual');
+        sessionStorage.removeItem('usuarioActual');
     }
 };
 
@@ -39,13 +39,13 @@ const mockLocalStorageUsuario = (usuario: UsuarioSesion | null) => {
 
 describe('Hook: usarDescuento', () => {
 
-    // Limpiar localStorage antes y después de cada prueba
+    // Limpiar sessionStorage antes y después de cada prueba
     beforeEach(() => {
-        localStorage.clear();
+        sessionStorage.clear();
     });
 
     afterEach(() => {
-        localStorage.clear();
+        sessionStorage.clear();
     });
 
     // ----------------------------------------------------------------------
@@ -55,7 +55,7 @@ describe('Hook: usarDescuento', () => {
     test('no debe aplicar descuento si el usuario no es Duoc', () => {
         // Arrange
         const usuario = { id: 1, username: 'usuario_normal', rol: 'user' };
-        mockLocalStorageUsuario(usuario as UsuarioSesion);
+        mockSessionStorageUsuario(usuario as UsuarioSesion);
 
         // Act
         const { result } = renderHook(() => usarDescuento(productoBase));
@@ -68,8 +68,8 @@ describe('Hook: usarDescuento', () => {
 
     test('debe redondear el precio final correctamente', () => {
         // Arrange
-        const usuario = { id: 1, username: 'profesor_duoc', rol: 'user' };
-        mockLocalStorageUsuario(usuario as UsuarioSesion);
+        const usuario = { id: 1, username: 'user_duoc_test', rol: 'user' };
+        mockSessionStorageUsuario(usuario as UsuarioSesion);
 
         // Act
         const { result } = renderHook(() => usarDescuento(productoConDecimal)); // precio 99
@@ -83,7 +83,7 @@ describe('Hook: usarDescuento', () => {
     test('Vuelve a calcular el precio si el producto cambia (usando rerender)', () => {
         // Arrange
         const usuario = { id: 1, username: 'user_duoc', rol: 'user' };
-        mockLocalStorageUsuario(usuario as UsuarioSesion);
+        mockSessionStorageUsuario(usuario as UsuarioSesion);
 
         // Render inicial con productoBase (1000)
         const { result, rerender } = renderHook(

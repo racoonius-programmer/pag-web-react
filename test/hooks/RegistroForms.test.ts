@@ -7,6 +7,14 @@ import { renderHook, act } from "@testing-library/react";
 import { useRegistroForm } from "../../src/hooks/RegistroForms";
 import type { ChangeEvent, FormEvent } from 'react';
 
+// Mock del servicio de usuario
+vi.mock('../../src/services/usuario.service', () => ({
+  UsuarioService: {
+    listar: vi.fn(),
+    crear: vi.fn(),
+  },
+}));
+
 // ----------------------------------------------------------------------
 // MOCKS Y AYUDANTES
 // ----------------------------------------------------------------------
@@ -43,14 +51,27 @@ describe('Pruebas unitarias Registro', () => {
     const navigateFnMock = vi.fn();
 
     // Fijar la fecha actual para pruebas consistentes de edad
-    beforeEach(() => {
+    beforeEach(async () => {
         vi.useFakeTimers();
         const mockDate = new Date(2025, 0, 15); // 15-Ene-2025
         vi.setSystemTime(mockDate);
 
-        // Limpiar mocks y localStorage antes de cada prueba
+        // Limpiar mocks y storage antes de cada prueba
         vi.clearAllMocks();
         localStorage.clear();
+        sessionStorage.clear();
+
+        // Configurar mocks por defecto
+        const { UsuarioService } = await import('../../src/services/usuario.service');
+        vi.mocked(UsuarioService.listar).mockResolvedValue([]);
+        vi.mocked(UsuarioService.crear).mockResolvedValue({
+            id: 1,
+            username: 'Usuario Valido',
+            correo: 'nuevo@duoc.cl',
+            rol: 'user',
+            descuentoDuoc: true,
+            message: 'Usuario creado exitosamente'
+        });
     });
 
     afterEach(() => {
@@ -181,10 +202,11 @@ describe('Pruebas unitarias Registro', () => {
         expect(localStorage.getItem('usuarios')).toBeNull(); // No se debe guardar nada
     });
 
-    test('Debe fallar si el correo ya existe', () => {
-        // Arrange
+    test('Debe fallar si el correo ya existe', async () => {
+        // Arrange - Mock del servicio para devolver un usuario existente
         const correoExistente = 'yaexiste@gmail.com';
-        localStorage.setItem('usuarios', JSON.stringify([{ id: 1, correo: correoExistente }]));
+        const { UsuarioService } = await import('../../src/services/usuario.service');
+        vi.mocked(UsuarioService.listar).mockResolvedValue([{ id: 1, correo: correoExistente, username: 'existente' }]);
         
         const { result } = renderHook(() => useRegistroForm('Metropolitana', 'Santiago', showModalMock, navigateFnMock));
 
@@ -199,18 +221,17 @@ describe('Pruebas unitarias Registro', () => {
         });
         
         // Act
-        act(() => {
-            result.current.handleSubmit(createSubmitEvent());
+        await act(async () => {
+            await result.current.handleSubmit(createSubmitEvent());
         });
 
         // Assert
         expect(showModalMock).toHaveBeenCalledWith("El correo ya está registrado.", "Error de Registro");
-        const usuarios = JSON.parse(localStorage.getItem('usuarios')!);
-        expect(usuarios.length).toBe(1); // No debe haber agregado el nuevo usuario
+        expect(UsuarioService.listar).toHaveBeenCalled();
     });
 
 
-    test('Debe registrar exitosamente un usuario y loguearlo', () => {
+    test('Debe registrar exitosamente un usuario y loguearlo', async () => {
         // Arrange
         const { result } = renderHook(() => useRegistroForm('Metropolitana', 'Santiago', showModalMock, navigateFnMock));
 
@@ -226,43 +247,44 @@ describe('Pruebas unitarias Registro', () => {
         });
 
         // Act
-        act(() => {
-            result.current.handleSubmit(createSubmitEvent());
+        await act(async () => {
+            await result.current.handleSubmit(createSubmitEvent());
         });
 
         // Assert
-        // 1. Verificar localStorage
-        const usuarios = JSON.parse(localStorage.getItem('usuarios')!);
-        const usuarioActual = JSON.parse(localStorage.getItem('usuarioActual')!);
+        // 1. Verificar que se llamó al servicio
+        const { UsuarioService } = await import('../../src/services/usuario.service');
+        expect(UsuarioService.crear).toHaveBeenCalled();
         
-        expect(usuarios).toHaveLength(1);
-        expect(usuarios[0].correo).toBe('nuevo@duoc.cl');
-        expect(usuarios[0].descuentoDuoc).toBe(true);
+        // 2. Verificar sessionStorage para usuario actual
+        const usuarioActual = JSON.parse(sessionStorage.getItem('usuarioActual')!);
+        
         expect(usuarioActual).toBeDefined();
-        expect(usuarioActual.id).toBe(1);
+        expect(usuarioActual.correo).toBe('nuevo@duoc.cl');
+        expect(usuarioActual.rol).toBe('user');
 
-        // 2. Verificar Modal
+        // 3. Verificar Modal
         expect(showModalMock).toHaveBeenCalledWith(
             expect.stringContaining('¡Registro exitoso!'),
             "Registro Exitoso",
             expect.any(Function) // El callback de redirección
         );
         
-        // 3. Simular click en "Aceptar" del modal (ejecutar el callback)
+        // 4. Simular click en "Aceptar" del modal (ejecutar el callback)
         const callbackRedireccion = showModalMock.mock.calls[0][2];
         act(() => {
             callbackRedireccion();
         });
 
-        // 4. Verificar Redirección
+        // 5. Verificar Redirección
         expect(navigateFnMock).toHaveBeenCalledWith('/main');
     });
 
 
 // Corregir el test de Admin (Línea 300)
-test('Debe registrar exitosamente y REDIRIGIR a /admin si hay un ADMIN logueado (Línea 300)', () => {
+test('Debe registrar exitosamente y REDIRIGIR a /admin si hay un ADMIN logueado (Línea 300)', async () => {
     // Arrange
-    localStorage.setItem('usuarioActual', JSON.stringify({ id: 99, rol: 'admin' })); // Simular admin logueado
+    sessionStorage.setItem('usuarioActual', JSON.stringify({ id: 99, rol: 'admin' })); // Simular admin logueado
     const { result } = renderHook(() => useRegistroForm('Metropolitana', 'Santiago', showModalMock, navigateFnMock));
     
     // Llenar formulario 100% válido para nuevo usuario
@@ -278,8 +300,8 @@ test('Debe registrar exitosamente y REDIRIGIR a /admin si hay un ADMIN logueado 
     });
 
     // Act
-    act(() => {
-        result.current.handleSubmit(createSubmitEvent());
+    await act(async () => {
+        await result.current.handleSubmit(createSubmitEvent());
     });
 
     // Assert (Verificar que se intentó redirigir a /admin)
@@ -294,12 +316,12 @@ test('Debe registrar exitosamente y REDIRIGIR a /admin si hay un ADMIN logueado 
         callbackRedireccion();
     });
     
-    expect(localStorage.getItem('usuarioActual')).toContain('"rol":"admin"'); 
+    expect(sessionStorage.getItem('usuarioActual')).toContain('"rol":"admin"'); 
     expect(navigateFnMock).toHaveBeenCalledWith('/admin'); 
 });
 
 // Corregir el test de Fallback (Línea 315)
-test('Debe usar window.location.href como FALLBACK si navigateFn es NULL (Línea 315)', () => {
+test('Debe usar window.location.href como FALLBACK si navigateFn es NULL (Línea 315)', async () => {
     // Arrange
     const originalLocationHref = window.location.href;
     Object.defineProperty(window, 'location', {
@@ -325,8 +347,8 @@ test('Debe usar window.location.href como FALLBACK si navigateFn es NULL (Línea
     });
 
     // Act (Submit)
-    act(() => {
-        result.current.handleSubmit(createSubmitEvent());
+    await act(async () => {
+        await result.current.handleSubmit(createSubmitEvent());
     });
     
     // Simular click en "Aceptar" del modal
